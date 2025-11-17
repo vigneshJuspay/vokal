@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "name": "Sample Voice Bot Test Suite",
+    "version": "1.0.0",
+    "description": "Example configuration for testing voice bot interactions",
+    "author": "Voice Test Team",
+    "tags": ["sample", "example", "getting-started"]
+  },
+  "settings": {
+    "defaultLanguage": "en-US",
+    "defaultVoice": "en-US-Neural2-D",
+    "recordingDuration": 10000,
+    "maxRetries": 2,
+    "passingScore": 0.7,
+    "vadSettings": {
+      "silenceThreshold": 0.02,
+      "silenceDuration": 2000,
+      "speechTimeout": 10000
+    },
+    "aiProvider": "google-ai"
+  },
+  "questions": [
+    {
+      "id": "greeting-question",
+      "question": "Hello! How are you today?",
+      "intent": "User should respond with a greeting and state how they feel",
+      "expectedElements": [
+        "Polite greeting or acknowledgment",
+        "Indication of their current state or feeling"
+      ],
+      "context": "Initial greeting to user",
+      "sampleResponse": "Hi, I'm doing well, thank you!"
+    },
+    {
+      "id": "name-question",
+      "question": "What is your name?",
+      "intent": "User should provide their name",
+      "expectedElements": ["A name or identifier", "Clear indication this is their name"],
+      "context": "Name collection",
+      "sampleResponse": "My name is John Smith"
+    },
+    {
+      "id": "help-question",
+      "question": "How can I help you today?",
+      "intent": "User should describe what they need assistance with",
+      "expectedElements": [
+        "Description of the issue or request",
+        "Context about what they need help with"
+      ],
+      "context": "Service request",
+      "sampleResponse": "I need help with my account settings"
+    }
+  ]
+}
