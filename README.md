@@ -1,115 +1,141 @@
-# Voice Test Framework
+# Vokal 🎙️
 
-> A production-ready voice bot testing framework with streaming Speech-to-Text, TTS, and AI-powered evaluation
+> A production-ready voice bot testing and interaction framework with streaming Speech-to-Text, Text-to-Speech, and AI-powered evaluation
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-## 🚀 Features
+## ✨ What is Vokal?
 
-### Core Capabilities
-- **🎤 Text-to-Speech (TTS)**: High-quality speech synthesis using Neurolink SDK with Google Gemini
-- **🎧 Streaming Speech-to-Text**: Real-time transcription with Google Cloud Speech-to-Text streaming API
-- **🗣️ Voice Activity Detection (VAD)**: Automatic speech start/end detection with configurable timeouts
-- **🤖 AI Response Evaluation**: Semantic analysis using Google Gemini for intelligent answer validation
-- **🎵 Audio Mixing**: Professional background audio mixing with multiple environment presets
-- **📊 Complete Voice Pipeline**: End-to-end conversation flow with recording and transcription
+Vokal is a comprehensive TypeScript framework for building, testing, and evaluating voice-based applications. It provides a provider-agnostic architecture for Speech-to-Text, Text-to-Speech, and AI-powered evaluation services. **Currently supports Google Cloud providers** (Speech-to-Text, Text-to-Speech, and Gemini AI), with an extensible design that allows for additional provider integrations.
 
-### Advanced Features
-- **Real-time Streaming**: Voice activity detection with interim and final transcription results
-- **Service Account Support**: Full Google Cloud integration with enhanced features
-- **Semantic Evaluation**: AI-powered response comparison (not exact text matching)
-- **Retry Mechanisms**: Automatic retry with exponential backoff for reliability
-- **Resource Management**: Proper cleanup and memory management
-- **Input Validation**: Comprehensive validation with descriptive errors
-- **Security**: Input sanitization and secure file handling
+**Perfect for:**
+- 🤖 Testing voice bots and conversational AI
+- 📞 IVR (Interactive Voice Response) system validation
+- 🎯 Voice UI/UX testing and evaluation
+- 🔊 Speech synthesis and recognition workflows
+- 🧪 Automated voice conversation testing
+
+## 🚀 Key Features
+
+### Voice Services
+- **🎤 Text-to-Speech (TTS)** - High-quality speech synthesis with multiple voices and languages
+- **🎧 Streaming Speech-to-Text** - Real-time audio transcription with voice activity detection
+- **🗣️ Voice Interaction Pipeline** - Complete TTS → Listen → STT conversation flows
+- **🎵 Background Audio Mixing** - Realistic test environments (office, cafe, phone, etc.)
+
+### Testing & Evaluation
+- **🤖 AI-Powered Evaluation** - Semantic response validation using Google Gemini
+- **📊 Comprehensive Test Suites** - JSON-based test configuration with detailed reporting
+- **🔄 Automatic Retries** - Built-in retry logic with exponential backoff
+- **📈 Performance Metrics** - Pass rates, confidence scores, and detailed analytics
 
 ### Developer Experience
-- **Full TypeScript Support**: Complete type safety with strict mode enabled
-- **Zero Errors Build**: No TypeScript, ESLint, or Prettier violations
-- **Professional Structure**: Industry-standard project organization
-- **Cross-Platform**: Works on macOS, Linux, and Windows
+- **📘 Full TypeScript Support** - Complete type safety with strict mode
+- **🛡️ Security First** - Input validation, sanitization, and secure credential handling
+- **🔧 Easy Configuration** - JSON-based configuration with sensible defaults
+- **📦 Modular Architecture** - Use individual services or the complete framework
 
 ## 📋 Table of Contents
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Core Services](#core-services)
-- [Configuration](#configuration)
-- [Architecture](#architecture)
-- [Examples](#examples)
-- [Security](#security)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Core Services](#-core-services)
+- [Documentation](#-documentation)
+- [Examples](#-examples)
+- [CLI Usage](#-cli-usage)
+- [Contributing](#-contributing)
 
 ## 🔧 Installation
 
 ### Prerequisites
 
-- **Node.js**: 18.x or higher
-- **npm**: 8.x or higher
-- **Google Cloud Credentials**: Service account JSON or API key
-- **Microphone Access**: For audio recording functionality
+```bash
+node -v  # Should be 18.x or higher
+npm -v   # Should be 8.x or higher
+```
 
-### Install Dependencies
+### Install Vokal
+
+```bash
+npm install vokal
+```
+
+Or clone and build from source:
 
 ```bash
 git clone https://github.com/your-org/vokal.git
 cd vokal
 npm install
+npm run build
 ```
 
-### Environment Setup
+### Set Up Credentials
 
-Create a `.env` file in the project root:
+Create a `.env` file in your project root:
 
 ```bash
-# Option 1: Service Account (Recommended - Full Feature Support)
+# Option 1: Service Account (Recommended - Full Features)
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 
 # Option 2: API Key (Limited Features)
-GOOGLE_AI_API_KEY=your_gemini_api_key_here
+GOOGLE_AI_API_KEY=your_api_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-**Note**: Service account authentication provides full access to Voice Activity Detection timeouts and enhanced STT features.
+> **💡 Tip:** Service account authentication provides access to advanced features like configurable VAD timeouts and enhanced STT capabilities.
 
-## 🚀 Quick Start
+> **🔄 Default Provider:** If no provider is explicitly specified, Vokal automatically defaults to `google-ai` for all services:
+> - **Text-to-Speech (TTS)**: Uses Google Cloud Text-to-Speech
+> - **Speech-to-Text (STT)**: Uses Google Cloud Speech-to-Text
+> - **AI Comparison**: Uses Google Gemini for semantic evaluation
+>
+> You can override the default by specifying a provider in your configuration:
+> ```json
+> {
+>   "settings": {
+>     "ttsProvider": "google-ai",
+>     "sttProvider": "google-ai", 
+>     "aiProvider": "google-ai"
+>   }
+> }
+> ```
+
+## 🎯 Quick Start
 
 ### 1. Simple Text-to-Speech
 
 ```typescript
-import { VoiceTestService } from './services/voice-test.js';
+import { createVoiceTest } from 'vokal';
 
-const voiceTest = new VoiceTestService();
+const voiceTest = createVoiceTest();
 
-// Generate and play speech
-await voiceTest.generateSpeech({
-  text: "Hello, world!",
+// Generate and save speech
+const audioPath = await voiceTest.generateSpeech({
+  text: "Welcome to Vokal! Your voice testing framework.",
   languageCode: 'en-US',
-  voiceName: 'en-US-Neural2-D',
-  play: true
+  voiceName: 'en-US-Neural2-F'
 });
+
+console.log('Audio saved to:', audioPath);
 ```
 
-### 2. Complete Voice Interaction
+### 2. Voice Interaction with Background Audio
 
 ```typescript
-import { VoiceInteractionService } from './services/voice-interaction.js';
+import { VoiceInteractionService } from 'vokal';
 
 const voiceBot = new VoiceInteractionService();
 
-// Validate system components
-const status = await voiceBot.validateSystem();
-console.log('System ready:', status);
-
-// Run voice interaction (TTS + Listen + STT)
+// Run complete voice interaction
 const result = await voiceBot.runVoiceInteraction(
   "What is your name?",
   {
     language: 'en-US',
     voice: 'en-US-Neural2-D',
-    maxRecordingDuration: 10000,
-    silenceTimeout: 2000
+    backgroundSound: 'office',
+    backgroundVolume: 0.15
   }
 );
 
@@ -117,10 +143,10 @@ console.log('User said:', result.transcript);
 console.log('Confidence:', result.confidence);
 ```
 
-### 3. Streaming Speech-to-Text
+### 3. Streaming Speech Recognition
 
 ```typescript
-import { StreamingSTTService } from './services/streaming-stt.js';
+import { StreamingSTTService } from 'vokal/services';
 
 const stt = new StreamingSTTService();
 
@@ -129,278 +155,196 @@ const session = stt.startStreaming(
     languageCode: 'en-US',
     sampleRateHertz: 16000,
     encoding: 'LINEAR16',
-    speechStartTimeout: 10,  // seconds to wait for speech to start
-    speechEndTimeout: 4      // seconds of silence to end speech
+    speechStartTimeout: 10,
+    speechEndTimeout: 4
   },
-  // onResult callback
   (result) => {
-    if (result.isFinal) {
-      console.log('Final:', result.transcript);
-      console.log('Confidence:', result.confidence);
-    } else {
-      console.log('Interim:', result.transcript);
-    }
+    console.log(result.isFinal ? 'Final:' : 'Interim:', result.transcript);
   },
-  // onSpeechStart callback
-  () => console.log('User started speaking'),
-  // onSpeechEnd callback
-  () => console.log('User stopped speaking'),
-  // onError callback
-  (error) => console.error('STT Error:', error)
+  () => console.log('🗣️ Speech started'),
+  () => console.log('🛑 Speech ended')
 );
 
-// Write audio chunks to the stream
-audioStream.on('data', (chunk) => {
-  session.writeAudio(chunk);
-});
+// Stream audio data
+audioStream.on('data', chunk => session.writeAudio(chunk));
 
-// End the stream when done
+// End the stream
 session.endStream();
 ```
 
-### 4. Voice Bot Testing with AI Evaluation
+### 4. Automated Voice Bot Testing
 
 ```typescript
-import { VoiceBotTestService } from './services/voice-bot-test.js';
+import { VoiceBotTestService } from 'vokal';
 
+// Run test suite from configuration
 const testService = VoiceBotTestService.create('./test-config.json');
 const results = await testService.runTestSuite();
 
-console.log('Pass Rate:', results.summary.passRate);
-console.log('Average Score:', results.summary.averageScore);
-console.log('Results saved to:', results.summary.resultsFile);
+console.log(`✅ Pass Rate: ${results.summary.passRate}%`);
+console.log(`📊 Average Score: ${results.summary.averageScore}`);
+console.log(`📁 Results: ${results.summary.resultsFile}`);
 ```
 
 ## 🎯 Core Services
 
-### StreamingSTTService
+| Service | Description | Use Case |
+|---------|-------------|----------|
+| **VoiceTestService** | Text-to-Speech with background audio | Generate test audio with realistic environments |
+| **StreamingSTTService** | Real-time speech-to-text | Live transcription with voice activity detection |
+| **VoiceInteractionService** | Complete TTS + Listen + STT pipeline | Full conversation simulation |
+| **VoiceBotTestService** | Automated test suite execution | Test multiple scenarios with AI evaluation |
+| **AIComparisonService** | AI-powered response evaluation | Semantic answer validation |
+| **AudioMixerService** | Background audio mixing | Add realistic noise to test scenarios |
+| **AudioRecordingService** | Microphone recording | Capture user responses |
 
-Real-time speech-to-text with voice activity detection.
+## 📚 Documentation
 
-**Features:**
-- Real-time interim results during speech
-- Automatic speech start/end detection
-- Configurable VAD timeouts
-- Support for service account and API key authentication
-- Multiple audio encodings (LINEAR16, WEBM_OPUS, MP3)
+Comprehensive documentation is available in the `docs/` folder:
 
-**Configuration:**
-```typescript
-interface StreamingSTTConfig {
-  languageCode: string;           // e.g., 'en-US'
-  sampleRateHertz: number;        // e.g., 16000
-  encoding: 'LINEAR16' | 'WEBM_OPUS' | 'MP3';
-  speechStartTimeout?: number;    // seconds (default: 10)
-  speechEndTimeout?: number;      // seconds (default: 4)
-}
+- **[Getting Started Guide](./docs/GETTING_STARTED.md)** - Installation and first steps
+- **[API Reference](./docs/API_REFERENCE.md)** - Complete API documentation
+- **[Configuration Guide](./docs/CONFIGURATION.md)** - Test suite configuration
+- **[Testing Guide](./docs/TESTING.md)** - Writing and running tests
+- **[Advanced Features](./docs/ADVANCED.md)** - Voice Activity Detection, streaming, and more
+- **[Troubleshooting](./docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Architecture](./docs/ARCHITECTURE.md)** - System design and components
+
+## 💡 Examples
+
+Check out the `examples/` directory for complete working examples:
+
+- **[Basic TTS](./examples/01-basic-tts.ts)** - Simple text-to-speech
+- **[Speech Recognition](./examples/02-speech-recognition.ts)** - Recording and transcription
+- **[Voice Interaction](./examples/03-voice-interaction.ts)** - Complete conversation flow
+- **[Test Suite](./examples/04-test-suite.ts)** - Automated testing
+- **[Advanced Streaming](./examples/05-advanced-streaming.ts)** - Real-time STT with VAD
+- **[Custom Configuration](./examples/sample-config.json)** - Test suite configuration
+
+## 🖥️ CLI Usage
+
+Vokal includes a powerful command-line interface:
+
+```bash
+# Run a test suite
+vokal test ./config.json
+
+# Generate speech from text
+vokal tts "Hello, world!" --voice en-US-Neural2-F --output speech.mp3
+
+# Transcribe audio file
+vokal stt audio.wav --language en-US
+
+# Interactive voice test
+vokal interact "What is your name?" --voice en-US-Neural2-D
+
+# Validate configuration
+vokal validate ./config.json
 ```
 
-### VoiceInteractionService
-
-Complete voice conversation pipeline integrating TTS, audio recording, and STT.
-
-**Features:**
-- Plays question using TTS
-- Records user response with microphone
-- Transcribes speech using streaming STT
-- Voice activity detection for automatic start/stop
-- Configurable timeouts and thresholds
-
-### VoiceTestService
-
-Text-to-speech generation with background audio mixing.
-
-**Features:**
-- High-quality TTS using Neurolink SDK
-- Background audio mixing (office, cafe, nature, etc.)
-- Multiple voice options
-- Adjustable speaking rate and pitch
-- Save to file or play directly
-
-### AIComparisonService
-
-AI-powered semantic response evaluation.
-
-**Features:**
-- Semantic matching (not exact text comparison)
-- Intent validation
-- Expected elements checking
-- Binary scoring (0 or 1)
-- Detailed analysis and suggestions
+Run `vokal --help` for complete CLI documentation.
 
 ## ⚙️ Configuration
 
-### Voice Bot Test Configuration
+### Test Suite Configuration
 
-Create a JSON configuration file for automated testing:
+Create a JSON file to define your test scenarios:
 
 ```json
 {
   "metadata": {
-    "name": "Customer Service Test",
+    "name": "My Voice Bot Tests",
     "version": "1.0.0"
   },
   "settings": {
     "defaultLanguage": "en-US",
     "defaultVoice": "en-US-Neural2-D",
     "recordingDuration": 10000,
-    "maxRetries": 2,
     "passingScore": 0.7,
     "vadSettings": {
       "silenceThreshold": 0.02,
-      "silenceDuration": 2000,
-      "speechTimeout": 10000
-    },
-    "aiProvider": "google-ai"
+      "silenceDuration": 2000
+    }
   },
   "questions": [
     {
       "id": "greeting",
-      "question": "Hello! How can I help you today?",
-      "intent": "User should respond with a greeting",
-      "expectedElements": [
-        "Polite greeting",
-        "Indication of needing help"
-      ]
+      "question": "Hello! How can I help you?",
+      "intent": "User greets and asks for help",
+      "expectedElements": ["Greeting", "Request for assistance"]
     }
   ]
 }
 ```
 
-### Available Background Sounds
-
-| Sound | Description | Default Volume |
-|-------|-------------|----------------|
-| `office` | Subtle office environment with typing | 0.15 |
-| `cafe` | Coffee shop with distant conversations | 0.20 |
-| `nature` | Peaceful outdoor with birds | 0.18 |
-| `rain` | Gentle rainfall | 0.12 |
-| `phone` | Phone line static | 0.08 |
-| `crowd` | Distant crowd noise | 0.10 |
+See [Configuration Guide](./docs/CONFIGURATION.md) for complete details.
 
 ## 🏗️ Architecture
 
+Vokal is built with a **provider-agnostic architecture** that separates service interfaces from their implementations. This design allows for easy integration of additional providers in the future.
+
+### Current Provider Support
+
+**Google Cloud (Default)**
+- Text-to-Speech via Google Cloud TTS
+- Speech-to-Text via Google Cloud STT
+- AI Evaluation via Google Gemini
+
+### Provider Architecture
+
 ```
 vokal/
-│
 ├── src/
-│   ├── services/
+│   ├── services/          # Core voice services (provider-agnostic)
 │   │   ├── voice-test.ts           # TTS service
-│   │   ├── streaming-stt.ts        # Real-time STT with VAD
-│   │   ├── voice-interaction.ts    # Complete voice pipeline
+│   │   ├── streaming-stt.ts        # Streaming STT
+│   │   ├── voice-interaction.ts    # Complete pipeline
 │   │   ├── voice-bot-test.ts       # Test orchestration
 │   │   ├── ai-comparison.ts        # AI evaluation
-│   │   ├── audio-mixer.ts          # Background audio
-│   │   ├── audio-recording.ts      # Microphone capture
-│   │   ├── stt.ts                  # Batch STT
-│   │   └── browser-voice-test.ts   # Browser automation
-│   ├── types/                      # TypeScript definitions
-│   ├── utils/                      # Utilities
-│   │   ├── logger.ts
-│   │   ├── validation.ts
-│   │   ├── retry.ts
-│   │   ├── secure-exec.ts
-│   │   └── stt-optimizer.ts
-│   ├── constants/                  # Configuration constants
-│   ├── errors/                     # Custom error classes
-│   └── cli/                        # CLI interface
-├── assets/                         # Background audio files
-└── docs/                           # Documentation
-```
-
-### Key Components
-
-1. **Streaming STT Service**
-   - Uses Google Cloud Speech-to-Text streaming API
-   - Real-time voice activity detection
-   - Interim and final transcription results
-   - Service account authentication for full features
-
-2. **Voice Interaction Service**
-   - Orchestrates TTS → Listen → STT pipeline
-   - Automatic speech start/end detection
-   - Configurable timeouts and thresholds
-   - Resource cleanup and error handling
-
-3. **Audio Recording Service**
-   - Cross-platform microphone capture
-   - Support for naudiodon (native) and node-record-lpcm16
-   - Configurable sample rate, channels, and bit depth
-   - Volume level monitoring
-
-4. **AI Comparison Service**
-   - Semantic response evaluation using Google Gemini
-   - Intent validation and expected elements checking
-   - Binary scoring with detailed analysis
-   - Retry logic for reliability
-
-## 📖 Examples
-
-### Voice Bot Test with Background Audio
-
-```typescript
-const result = await voiceBot.runVoiceInteraction(
-  "Welcome! Please tell me your name.",
-  {
-    language: 'en-US',
-    voice: 'en-US-Neural2-F',
-    backgroundSound: 'office',
-    backgroundVolume: 0.15,
-    maxRecordingDuration: 10000,
-    silenceTimeout: 2000
-  }
-);
-```
-
-### Custom STT Processing
-
-```typescript
-const stt = new StreamingSTTService();
-
-let finalTranscript = '';
-
-const session = stt.startStreaming(
-  { languageCode: 'en-US', sampleRateHertz: 16000, encoding: 'LINEAR16' },
-  (result) => {
-    if (result.isFinal) {
-      finalTranscript += ' ' + result.transcript;
-    }
-  },
-  () => console.log('🗣️ Speech started'),
-  () => {
-    console.log('🛑 Speech ended');
-    console.log('Complete transcript:', finalTranscript);
-  }
-);
+│   │   ├── audio-mixer.ts          # Audio processing
+│   │   └── audio-recording.ts      # Microphone capture
+│   ├── providers/         # Provider implementations
+│   │   └── google-ai/     # Google Cloud provider
+│   ├── types/             # TypeScript type definitions
+│   ├── utils/             # Utilities (logging, retry, validation)
+│   ├── constants/         # Configuration constants
+│   ├── errors/            # Custom error classes
+│   └── cli/               # Command-line interface
+├── examples/              # Example code and configurations
+├── docs/                  # Documentation
+└── assets/                # Background audio files
 ```
 
 ## 🛡️ Security
 
-This project follows security best practices:
+Vokal follows security best practices:
 
-- ✅ Input validation on all user inputs
+- ✅ Input validation and sanitization
+- ✅ Secure credential handling
 - ✅ No command injection vulnerabilities
-- ✅ Secure file path handling (no path traversal)
+- ✅ Safe file path handling
 - ✅ API key validation
-- ✅ Sanitized text inputs
-- ✅ Safe shell command execution
 - ✅ No hardcoded secrets
 
-### Security Recommendations
+See [SECURITY.md](./docs/SECURITY.md) for security guidelines.
 
-1. **Service Account Security**
-   - Store service account JSON files securely
-   - Use environment variables for paths
-   - Never commit credentials to git
-   - Rotate service accounts regularly
+## 🧪 Testing
 
-2. **API Key Security**
-   - Use `.env` files (add to `.gitignore`)
-   - Never expose keys in client-side code
-   - Use different keys for dev/prod environments
-   - Monitor API usage for anomalies
+```bash
+# Build the project
+npm run build
 
-## 📦 Scripts
+# Run linting
+npm run lint
+
+# Format code
+npm run format
+
+# Type checking
+npm run typecheck
+```
+
+## 📦 NPM Scripts
 
 | Script | Description |
 |--------|-------------|
@@ -409,9 +353,32 @@ This project follows security best practices:
 | `npm run clean` | Clean build directory |
 | `npm run lint` | Lint code with ESLint |
 | `npm run format` | Format code with Prettier |
+| `npm run typecheck` | Run TypeScript type checking |
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](./CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- [Neurolink](https://github.com/juspay/neurolink) - TTS SDK
-- [Google Cloud Speech-to-Text](https://cloud.google.com/speech-to-text) - Streaming STT API
-- [Google Gemini](https://ai.google.dev/) - AI evaluation
+- **[Neurolink SDK](https://github.com/juspay/neurolink)** - TTS integration
+- **[Google Cloud Speech-to-Text](https://cloud.google.com/speech-to-text)** - Streaming STT API
+- **[Google Gemini](https://ai.google.dev/)** - AI-powered evaluation
+
+## 📞 Support
+
+- 📖 [Documentation](./docs/)
+- 💬 [GitHub Issues](https://github.com/your-org/vokal/issues)
+- 📧 Email: support@vokal.dev
+
+---
