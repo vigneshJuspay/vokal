@@ -1,72 +1,59 @@
 /**
  * Voice Test Application Types
- * Simplified types for TTS + audio mixing functionality
+ * Centralized type exports from all type files
  */
 
-export interface VoiceTestInput {
+// Core voice test types
+export type VoiceTestInput = {
   /** Text to convert to speech */
   text: string;
-
   /** Language code (e.g., 'en-US', 'en-GB', 'es-ES') */
   languageCode: string;
-
   /** Voice name */
   voiceName: string;
-
   /** Audio encoding format */
   audioEncoding?: 'MP3' | 'WAV' | 'OGG';
-
   /** Speaking rate (0.25 to 4.0, default: 1.0) */
   speakingRate?: number;
-
   /** Voice pitch (-20.0 to 20.0, default: 0.0) */
   pitch?: number;
-
   /** Optional output file path */
   output?: string;
-
   /** Whether to play audio after generating */
   play?: boolean;
-
   /** Optional background sound (preset name or file path) */
   backgroundSound?: string;
-
   /** Background sound volume (0.0 to 1.0) */
   backgroundVolume?: number;
-}
+};
 
-export interface VoiceTestConfig {
+export type VoiceTestConfig = {
   /** API Key for Neurolink/Gemini */
   apiKey: string;
-
   /** Default output directory for audio files */
   defaultOutputDir?: string;
-
   /** Default audio encoding */
   defaultEncoding?: 'MP3' | 'WAV' | 'OGG';
-}
+  /** TTS provider for text-to-speech generation (supports any Neurolink provider) */
+  provider?: string;
+};
 
-export interface VoiceTestResponse {
+export type VoiceTestResponse = {
   /** Generated audio file path */
   filePath: string;
-
   /** Size of the generated audio file in bytes */
   fileSize: number;
-
   /** Duration of audio generation in milliseconds */
   generationTime: number;
-
   /** Whether audio was played */
   wasPlayed: boolean;
-
   /** Whether background audio was mixed */
   mixedAudio?: boolean;
-
   /** Additional metadata */
   metadata?: Record<string, unknown>;
-}
+};
 
-export interface BackgroundSoundPreset {
+export type BackgroundSoundPreset = {
   /** Preset name */
   name: string;
   /** File path to the audio file */
@@ -77,9 +64,9 @@ export interface BackgroundSoundPreset {
   loop: boolean;
   /** Description of the sound */
   description: string;
-}
+};
 
-export interface AudioMixingConfig {
+export type AudioMixingConfig = {
   /** Volume of background sound (0.0 to 1.0) */
   backgroundVolume: number;
   /** Fade in duration in seconds */
@@ -88,9 +75,9 @@ export interface AudioMixingConfig {
   fadeOut: number;
   /** Whether to loop background if shorter than speech */
   loop: boolean;
-}
+};
 
-export interface AudioMixer {
+export type AudioMixer = {
   /** Mix TTS audio with background sound */
   mixAudio(speechPath: string, backgroundSound: string, backgroundVolume?: number): Promise<string>;
   /** Get available background sound presets */
@@ -101,35 +88,71 @@ export interface AudioMixer {
     backgroundSound: string,
     backgroundVolume?: number
   ): AudioMixingConfig;
-}
+};
 
-/**
- * @deprecated Use the new error classes from '../errors/voice-test.errors.js'
- * Kept for backward compatibility
- */
-export class VoiceTestError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public originalError?: Error
-  ) {
-    super(message);
-    this.name = 'VoiceTestError';
-  }
-}
-
-export interface Logger {
+export type Logger = {
   debug(message: string, ...args: unknown[]): void;
   info(message: string, ...args: unknown[]): void;
   warn(message: string, ...args: unknown[]): void;
   error(message: string, ...args: unknown[]): void;
-}
+};
 
 // ============================================================================
-// STT (Speech-to-Text) Types - Re-export from STT service
+// Re-export all types from dedicated type files
 // ============================================================================
 
-export type { STTInput, STTResponse } from '../services/stt.js';
+// STT Types
+export type { STTInput, STTResponse, AudioQualityMetrics, STTConfig } from './stt.types.js';
+
+// STT Provider Types (includes StreamingSTTConfig and StreamingSTTResult)
+export type {
+  STTHandler,
+  STTRequest,
+  STTResponse as STTProviderResponse,
+  StreamingSTTConfig,
+  StreamingSTTResult,
+  StreamingSession,
+  STTProviderName,
+} from './stt-provider.types.js';
+
+// Audio Types
+export type { AudioConfig, AudioRecordingSession, AudioDevice, AudioData } from './audio.types.js';
+
+// Voice Interaction Types
+export type { VoiceInteractionConfig, VoiceInteractionResult } from './voice-interaction.types.js';
+
+// AI Comparison Types
+export type {
+  AIProvider,
+  ComparisonInput,
+  ComparisonResult,
+  ParsedAIResponse,
+} from './ai-comparison.types.js';
+
+// Voice Test Service Types
+export type { AudioFormat, TTSOptions, TTSResult, GoogleVoice } from './voice-test.types.js';
+
+// CLI Types
+export type {
+  PackageJson,
+  GenerateCommandArgs,
+  VoicesCommandArgs,
+  TestAudioCommandArgs,
+  PlayCommandArgs,
+  TestCommandArgs,
+  Voice,
+  BackgroundSound,
+} from './cli.types.js';
+
+// Logger Types
+export { LogLevel } from './logger.types.js';
+export type { LogEntry, LoggerConfig } from './logger.types.js';
+
+// Retry Types
+export type { RetryOptions, CircuitBreakerOptions } from './retry.types.js';
+
+// Secure Exec Types
+export type { ExecOptions, ExecResult, AudioToolCheck } from './secure-exec.types.js';
 
 // ============================================================================
 // Voice Bot Testing Types
@@ -144,17 +167,19 @@ export type {
   PerformanceMetrics,
   TestMetadata,
   TestSettings,
+  QuestionSettings,
+  TestExecutionMetadata,
 } from './voice-bot-config.js';
 
 export { SAMPLE_TEST_CONFIG, TEST_CONFIG_SCHEMA } from './voice-bot-config.js';
 
 // ============================================================================
-// Error Classes - Enhanced error handling
+// Error Classes - Re-export from errors module
 // ============================================================================
 
 export {
   ErrorCode,
-  VoiceTestError as VoiceTestErrorV2,
+  VoiceTestError,
   ConfigurationError,
   FileSystemError,
   AudioProcessingError,
@@ -176,95 +201,7 @@ export {
 } from '../errors/voice-test.errors.js';
 
 // ============================================================================
-// Constants - Audio configuration constants
+// Validation - Re-export from validation utils
 // ============================================================================
 
-export {
-  AUDIO_ENCODING,
-  STT_ENCODING,
-  AUDIO_DEFAULTS,
-  AUDIO_LIMITS,
-  STT_DEFAULTS,
-  VAD_CONFIG,
-  FADE_DURATIONS,
-  VOLUME_PRESETS,
-  FILE_CONSTANTS,
-  API_CONSTANTS,
-  SPEECH_CONTEXT_PHRASES,
-  PCM_CONSTANTS,
-  type AudioEncoding,
-  type STTEncoding,
-} from '../constants/audio.constants.js';
-
-// ============================================================================
-// Logger - Enhanced logging utilities
-// ============================================================================
-
-export {
-  LogLevel,
-  ConsoleLogger as ConsoleLoggerV2,
-  SilentLogger as SilentLoggerV2,
-  getLogger,
-  setLogger,
-  createLogger,
-  createComponentLogger,
-  type LogEntry,
-  type LoggerConfig,
-} from '../utils/logger.js';
-
-// ============================================================================
-// Validation - Input validation utilities
-// ============================================================================
-
-export {
-  validateSpeakingRate,
-  validatePitch,
-  validateVolume,
-  validateText,
-  validateLanguageCode,
-  validateVoiceName,
-  validateAudioEncoding,
-  validateSTTEncoding,
-  validateSampleRate,
-  validateFilePath,
-  validateAPIKey,
-  validateVoiceTestInput,
-  sanitizeText,
-  normalizeLanguageCode,
-  clamp,
-  safeJSONParse,
-  isValidNumber,
-  isNonEmptyString,
-  ValidationResult,
-} from '../utils/validation.js';
-
-// ============================================================================
-// Retry & Reliability - Retry logic and circuit breaker
-// ============================================================================
-
-export {
-  retry,
-  withTimeout,
-  createResilientFunction,
-  CircuitBreaker,
-  DEFAULT_RETRY_OPTIONS,
-  DEFAULT_CIRCUIT_BREAKER_OPTIONS,
-  type RetryOptions,
-  type CircuitBreakerOptions,
-} from '../utils/retry.js';
-
-// ============================================================================
-// Security - Secure subprocess execution
-// ============================================================================
-
-export {
-  safeExec,
-  commandExists,
-  getCommandVersion,
-  checkAudioTools,
-  validateSafePath,
-  sanitizeEnv,
-  type ExecOptions,
-  type ExecResult,
-  type AudioToolCheck,
-} from '../utils/secure-exec.js';
+export { safeJSONParse } from '../utils/validation.js';

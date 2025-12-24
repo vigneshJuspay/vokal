@@ -1,11 +1,11 @@
 {
-  "name": "voice-test",
+  "name": "vokal",
   "version": "1.0.0",
   "description": "Production voice bot framework with TTS, STT, and AI evaluation using Neurolink",
   "main": "dist/src/index.js",
   "type": "module",
   "bin": {
-    "voice-test": "dist/src/cli/index.js"
+    "vokal": "dist/src/cli/index.js"
   },
   "scripts": {
     "dev": "tsc --watch",
@@ -37,12 +37,11 @@
   "license": "MIT",
   "dependencies": {
     "@google-cloud/speech": "^7.2.1",
-    "@juspay/neurolink": "^7.52.0",
+    "@juspay/neurolink": "^8.19.0",
     "chalk": "^5.3.0",
     "dotenv": "^16.4.5",
     "node-record-lpcm16": "^1.0.1",
     "ora": "^7.0.1",
-    "puppeteer": "^24.23.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
@@ -59,7 +58,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/voice-test.git"
+    "url": "https://github.com/your-org/vokal.git"
   },
   "files": [
     "dist",

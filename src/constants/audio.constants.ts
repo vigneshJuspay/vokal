@@ -107,7 +107,7 @@ export const VOLUME_PRESETS = {
  * File system constants
  */
 export const FILE_CONSTANTS = {
-  DEFAULT_OUTPUT_FILENAME: 'voice-test-output',
+  DEFAULT_OUTPUT_FILENAME: 'vokal-output',
   ASSETS_DIR: 'assets',
   WAV_HEADER_SIZE: 44,
   MIXED_SUFFIX: '_mixed',

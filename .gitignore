@@ -31,6 +31,7 @@ voice-test-results-*.json
 conversation-report-*.json
 browser-test-results-*.json
 browser-conversation-report-*.json
+vokal-results-*.json
 
 # Ignore business-specific configs and backups
 business-*.json
@@ -98,6 +99,7 @@ mixed_*.mp3
 mixed_*.wav
 mixed_*.ogg
 voice-test-output.*
+vokal-output.*
 
 # IDE
 .vscode/

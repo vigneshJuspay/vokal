@@ -12,6 +12,7 @@
     "recordingDuration": 10000,
     "maxRetries": 2,
     "passingScore": 0.7,
+    "questionDelay": 0,
     "vadSettings": {
       "silenceThreshold": 0.02,
       "silenceDuration": 2000,

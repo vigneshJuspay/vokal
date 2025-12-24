@@ -3,16 +3,16 @@
  * Defines the structure for voice bot conversation configurations
  */
 
-export interface VoiceBotConfig {
+export type VoiceBotConfig = {
   /** Conversation suite metadata */
   metadata: TestMetadata;
   /** Global conversation settings */
   settings: TestSettings;
   /** Array of test questions */
   questions: TestQuestion[];
-}
+};
 
-export interface TestMetadata {
+export type TestMetadata = {
   /** Name of the test suite */
   name: string;
   /** Version of the test configuration */
@@ -25,9 +25,9 @@ export interface TestMetadata {
   createdAt: string;
   /** Tags for categorization */
   tags: string[];
-}
+};
 
-export interface TestSettings {
+export type TestSettings = {
   /** Default language for speech recognition */
   defaultLanguage: string;
   /** Default voice for TTS responses */
@@ -43,8 +43,12 @@ export interface TestSettings {
     /** Timeout for initial speech detection (ms) */
     speechTimeout: number;
   };
-  /** AI provider for response comparison */
-  aiProvider: 'bedrock' | 'vertex' | 'openai' | 'google-ai';
+  /** TTS provider for text-to-speech (supports any Neurolink provider: 'google-ai', 'openai', 'elevenlabs', 'azure', etc.) */
+  ttsProvider?: string;
+  /** STT provider for speech-to-text (supports any Neurolink provider: 'google-ai', 'deepgram', 'assemblyai', etc.) */
+  sttProvider?: string;
+  /** AI provider for response comparison (supports any Neurolink provider: 'google-ai', 'openai', 'anthropic', 'bedrock', etc.) */
+  aiProvider?: string;
   /** Minimum score threshold for passing (0 or 1) */
   passingScore: number;
   /** Maximum retries per question */
@@ -57,9 +61,9 @@ export interface TestSettings {
   backgroundSound?: string;
   /** Background volume (0.0 to 1.0) */
   backgroundVolume: number;
-}
+};
 
-export interface TestQuestion {
+export type TestQuestion = {
   /** Unique identifier for the question */
   id: string;
   /** The question text to be asked */
@@ -80,9 +84,9 @@ export interface TestQuestion {
   weight?: number;
   /** Whether this question is required for test completion */
   required?: boolean;
-}
+};
 
-export interface QuestionSettings {
+export type QuestionSettings = {
   /** Language override for this question */
   language: string;
   /** Voice override for this question */
@@ -97,9 +101,9 @@ export interface QuestionSettings {
   backgroundVolume: number;
   /** Whether to play this question via TTS */
   playQuestion: boolean;
-}
+};
 
-export interface TestResult {
+export type TestResult = {
   /** Test execution metadata */
   metadata: TestExecutionMetadata;
   /** Overall test results */
@@ -108,9 +112,9 @@ export interface TestResult {
   questionResults: QuestionResult[];
   /** Performance metrics */
   performance: PerformanceMetrics;
-}
+};
 
-export interface TestExecutionMetadata {
+export type TestExecutionMetadata = {
   /** Test configuration used */
   configName: string;
   /** When the test was executed */
@@ -123,9 +127,9 @@ export interface TestExecutionMetadata {
     nodeVersion: string;
     voiceTestVersion: string;
   };
-}
+};
 
-export interface TestSummary {
+export type TestSummary = {
   /** Total number of questions */
   totalQuestions: number;
   /** Number of questions attempted */
@@ -142,9 +146,9 @@ export interface TestSummary {
   averageScore: number;
   /** Whether the overall test passed */
   testPassed: boolean;
-}
+};
 
-export interface QuestionResult {
+export type QuestionResult = {
   /** Question ID */
   questionId: string;
   /** Original question text */
@@ -178,9 +182,9 @@ export interface QuestionResult {
   passed: boolean;
   /** Any errors encountered */
   errors?: string[];
-}
+};
 
-export interface PerformanceMetrics {
+export type PerformanceMetrics = {
   /** TTS generation times */
   ttsMetrics: {
     averageGenerationTime: number;
@@ -205,7 +209,7 @@ export interface PerformanceMetrics {
     cpuUsage?: number;
     errorRate: number;
   };
-}
+};
 
 /**
  * JSON Schema for validation
@@ -233,7 +237,6 @@ export const TEST_CONFIG_SCHEMA = {
         'defaultVoice',
         'recordingDuration',
         'vadSettings',
-        'aiProvider',
         'passingScore',
       ],
       properties: {
@@ -249,10 +252,9 @@ export const TEST_CONFIG_SCHEMA = {
             speechTimeout: { type: 'number', minimum: 3000, maximum: 30000 },
           },
         },
-        aiProvider: {
-          type: 'string',
-          enum: ['bedrock', 'vertex', 'openai', 'google-ai'],
-        },
+        ttsProvider: { type: 'string' },
+        sttProvider: { type: 'string' },
+        aiProvider: { type: 'string' },
         passingScore: { type: 'number', minimum: 1, maximum: 10 },
         maxRetries: { type: 'number', minimum: 0, maximum: 5 },
         questionDelay: { type: 'number', minimum: 0, maximum: 10000 },
@@ -309,7 +311,9 @@ export const SAMPLE_TEST_CONFIG: VoiceBotConfig = {
       silenceDuration: 2000, // 2 seconds of silence to stop
       speechTimeout: 15000, // 10 seconds to start speaking
     },
-    aiProvider: 'google-ai',
+    ttsProvider: 'google-ai', // Can be 'google-ai', 'openai', 'elevenlabs', 'azure', etc.
+    sttProvider: 'google-ai', // Can be 'google-ai', 'deepgram', 'assemblyai', etc.
+    aiProvider: 'google-ai', // Can be 'google-ai', 'openai', 'anthropic', 'bedrock', etc.
     passingScore: 7,
     maxRetries: 2,
     questionDelay: 2000,

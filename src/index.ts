@@ -1,15 +1,80 @@
 /**
- * Voice Test Application
- * Simple TTS application that uses Neurolink SDK for speech generation
- * and adds background audio mixing capabilities
+ * Vokal SDK - Voice Test Application
+ *
+ * Comprehensive text-to-speech and speech-to-text SDK with advanced audio processing capabilities.
+ * Built on top of Neurolink SDK for speech generation with additional background audio mixing,
+ * real-time voice interaction, and AI-powered voice bot testing features.
+ *
+ * @module vokal
+ * @since 1.0.0
+ *
+ * @remarks
+ * This package provides a complete voice testing and interaction framework including:
+ * - **Text-to-Speech (TTS)**: High-quality speech generation using Google AI
+ * - **Speech-to-Text (STT)**: Streaming speech recognition with voice activity detection
+ * - **Audio Processing**: Background audio mixing, recording, and playback
+ * - **Voice Interaction**: Complete conversational AI pipelines
+ * - **Voice Bot Testing**: Comprehensive test suites with AI-powered evaluation
+ * - **Error Handling**: Type-safe error system with detailed error codes
+ * - **Utilities**: Retry logic, circuit breakers, logging, and validation
+ *
+ * @example
+ * ```typescript
+ * // Basic TTS with background audio
+ * import { createVoiceTest } from 'vokal';
+ *
+ * const voiceTest = createVoiceTest(process.env.GOOGLE_AI_API_KEY);
+ * await voiceTest.generateSpeech({
+ *   text: 'Hello, world!',
+ *   languageCode: 'en-US',
+ *   voiceName: 'en-US-Neural2-F',
+ *   backgroundSound: 'cafe',
+ *   play: true
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Voice interaction with STT
+ * import { VoiceInteractionService } from 'vokal';
+ *
+ * const interaction = new VoiceInteractionService(apiKey);
+ * const result = await interaction.runVoiceInteraction(
+ *   'What is your name?',
+ *   { language: 'en-US', voice: 'en-US-Neural2-D' }
+ * );
+ * console.log('User said:', result.transcript);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Run voice bot test suite
+ * import { VoiceBotTestService } from 'vokal';
+ *
+ * const testService = VoiceBotTestService.create('./config.json', apiKey);
+ * const results = await testService.runTestSuite();
+ * console.log('Test passed:', results.summary.testPassed);
+ * ```
  */
 
-// Main Voice Test service
 import { VoiceTestService } from './services/voice-test.js';
-export { VoiceTestService };
 
-// Audio mixing service
+// Audio services
 export { AudioMixerService } from './services/audio-mixer.js';
+export { AudioRecordingService } from './services/audio-recording.js';
+
+// Voice Interaction Service
+export { VoiceInteractionService } from './services/voice-interaction.js';
+
+// AI Comparison Service
+export { AIComparisonService } from './services/ai-comparison.js';
+
+// Voice Bot Test Service
+export { VoiceBotTestService } from './services/voice-bot-test.js';
+
+// STT Provider Management
+export { STTHandlerManager } from './providers/stt-handler-manager.js';
+export { GoogleAISTTHandler } from './providers/google-ai-stt.handler.js';
 
 // Types
 export type {
@@ -20,15 +85,34 @@ export type {
   AudioMixingConfig,
   AudioMixer,
   Logger,
+  STTInput,
+  STTResponse,
+  AudioConfig,
+  AudioRecordingSession,
+  AudioDevice,
+  VoiceInteractionConfig,
+  VoiceInteractionResult,
+  StreamingSTTConfig,
+  StreamingSTTResult,
+  VoiceBotConfig,
+  TestQuestion,
+  TestResult,
+  QuestionResult,
+  TestSummary,
+  RetryOptions,
+  CircuitBreakerOptions,
+  // STT Provider Types
+  STTHandler,
+  STTRequest,
+  STTProviderResponse,
+  StreamingSession,
+  STTProviderName,
 } from './types/index.js';
 
-// Error classes (legacy - for backward compatibility)
-export { VoiceTestError } from './types/index.js';
-
-// Enhanced error classes (recommended)
+// Error classes and utilities
 export {
   ErrorCode,
-  VoiceTestErrorV2,
+  VoiceTestError,
   ConfigurationError,
   FileSystemError,
   AudioProcessingError,
@@ -38,87 +122,53 @@ export {
   ValidationError,
   createError,
   isVoiceTestError,
-} from './types/index.js';
-
-// Constants
-export {
-  AUDIO_ENCODING,
-  AUDIO_DEFAULTS,
-  AUDIO_LIMITS,
-  STT_DEFAULTS,
-  VAD_CONFIG,
-  FADE_DURATIONS,
-  VOLUME_PRESETS,
-  FILE_CONSTANTS,
-  API_CONSTANTS,
+  isConfigurationError,
+  isFileSystemError,
+  isAudioProcessingError,
+  isSTTError,
+  isRecordingError,
+  isAPIError,
+  isValidationError,
+  toError,
+  getErrorMessage,
 } from './types/index.js';
 
 // Validation utilities
-export {
-  validateSpeakingRate,
-  validatePitch,
-  validateVolume,
-  validateText,
-  validateLanguageCode,
-  validateVoiceName,
-  validateVoiceTestInput,
-  sanitizeText,
-  normalizeLanguageCode,
-  clamp,
-  isValidNumber,
-  isNonEmptyString,
-} from './types/index.js';
+export { safeJSONParse } from './types/index.js';
 
-// Logger utilities (legacy - for backward compatibility)
-export { ConsoleLogger, SilentLogger } from './utils/logger.js';
+// Logger
+export { LogLevel, ConsoleLogger, SilentLogger, createComponentLogger } from './utils/logger.js';
+export type { LogEntry, LoggerConfig } from './types/index.js';
 
-// Enhanced logger utilities (recommended)
-export {
-  LogLevel,
-  ConsoleLoggerV2,
-  SilentLoggerV2,
-  getLogger,
-  setLogger,
-  createLogger,
-  createComponentLogger,
-} from './types/index.js';
+// STT Optimization utilities
+export { getOptimalConfig, validateAudio, normalizeVolume } from './utils/stt-optimizer.js';
 
-// STT Optimization utilities (simplified - industry best practices)
-export {
-  getOptimalConfig,
-  validateAudio,
-  normalizeVolume,
-  buildSpeechContexts,
-  analyzeConfidence,
-} from './utils/stt-optimizer.js';
-
-export type { STTConfig } from './utils/stt-optimizer.js';
-
-// Retry and reliability utilities
+// Retry utilities
 export { retry, withTimeout, CircuitBreaker, createResilientFunction } from './utils/retry.js';
 
-export type { RetryOptions, CircuitBreakerOptions } from './utils/retry.js';
-
 // Secure execution utilities
-export {
-  safeExec,
-  commandExists,
-  getCommandVersion,
-  checkAudioTools,
-  validateSafePath,
-  sanitizeEnv,
-} from './utils/secure-exec.js';
+export { safeExec, commandExists, checkAudioTools } from './utils/secure-exec.js';
+export type { ExecOptions, ExecResult, AudioToolCheck } from './types/index.js';
 
-export type { ExecOptions, ExecResult, AudioToolCheck } from './utils/secure-exec.js';
-
-// STT Service
-export { STTService } from './services/stt.js';
-export type { STTInput, STTResponse } from './services/stt.js';
-
-// Convenience factory function
+/**
+ * Convenience factory function for creating VoiceTestService instances.
+ *
+ * @param apiKey - Optional Google AI API key. If not provided, uses environment variables.
+ * @returns A configured VoiceTestService instance ready for TTS generation
+ *
+ * @example
+ * ```typescript
+ * const voiceTest = createVoiceTest(process.env.GOOGLE_AI_API_KEY);
+ * const audioPath = await voiceTest.generateSpeech({
+ *   text: 'Hello, world!',
+ *   languageCode: 'en-US',
+ *   voiceName: 'en-US-Neural2-F'
+ * });
+ * ```
+ */
 export const createVoiceTest = (apiKey?: string): VoiceTestService => {
   return VoiceTestService.create(apiKey);
 };
 
 // Default export
-export { VoiceTestService as default };
+export { VoiceTestService as default } from './services/voice-test.js';

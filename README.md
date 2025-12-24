@@ -53,15 +53,9 @@
 ### Install Dependencies
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/voice-test.git
-cd voice-test
-
-# Install dependencies
+git clone https://github.com/your-org/vokal.git
+cd vokal
 npm install
-
-# Build the project
-npm run build
 ```
 
 ### Environment Setup
@@ -287,12 +281,13 @@ Create a JSON configuration file for automated testing:
 ## 🏗️ Architecture
 
 ```
-voice-test/
+vokal/
+│
 ├── src/
 │   ├── services/
+│   │   ├── voice-test.ts           # TTS service
 │   │   ├── streaming-stt.ts        # Real-time STT with VAD
 │   │   ├── voice-interaction.ts    # Complete voice pipeline
-│   │   ├── voice-test.ts           # TTS service
 │   │   ├── voice-bot-test.ts       # Test orchestration
 │   │   ├── ai-comparison.ts        # AI evaluation
 │   │   ├── audio-mixer.ts          # Background audio

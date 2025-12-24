@@ -1,36 +1,82 @@
 /**
- * STT Optimizer - Industry Best Practices for >90% Confidence
- * Based on Google Cloud Speech-to-Text production guidelines
+ * STT Optimizer - Industry Best Practices for Speech Recognition
+ *
+ * Provides optimized configuration and audio preprocessing for achieving high-confidence
+ * speech-to-text transcription. Based on Google Cloud Speech-to-Text production guidelines
+ * and industry best practices.
+ *
+ * @module utils/stt-optimizer
+ * @since 1.0.0
+ *
+ * @remarks
+ * This module optimizes STT accuracy through:
+ * - **Optimal Configuration**: Provider-specific sample rates and models
+ * - **Audio Validation**: Quality checks for volume and duration
+ * - **Volume Normalization**: Automatic level adjustment to target range
+ * - **Phrase Boosting**: Context-aware speech recognition hints
+ * - **Confidence Analysis**: Transcription quality assessment
+ *
+ * Target: >90% confidence for clear, synthesized speech
+ *
+ * @example
+ * ```typescript
+ * import { getOptimalConfig, normalizeVolume, validateAudio } from './utils/stt-optimizer.js';
+ *
+ * // Get optimal config for TTS provider
+ * const config = getOptimalConfig('google', ['hello', 'world']);
+ *
+ * // Validate audio quality
+ * const validation = validateAudio(audioBuffer);
+ * if (!validation.isValid) {
+ *   console.warn('Audio issues:', validation.issues);
+ * }
+ *
+ * // Normalize volume for optimal recognition
+ * const normalized = normalizeVolume(audioBuffer);
+ * ```
  */
 
 import { createComponentLogger } from './logger.js';
+import type { STTConfig } from '../types/index.js';
 
 const logger = createComponentLogger('STTOptimizer');
 
 /**
- * TTS-optimized STT configuration
- * These are the settings that actually matter for reliability
- */
-export interface STTConfig {
-  // Audio format (critical)
-  encoding: 'LINEAR16';
-  sampleRate: number;
-
-  // Model selection (critical)
-  model: 'latest_short' | 'latest_long' | 'phone_call';
-
-  // Speech adaptation (20-30% accuracy boost)
-  phraseHints?: string[];
-  phraseBoost?: number; // 15-20 recommended
-
-  // API settings
-  enableAutomaticPunctuation: boolean;
-  maxAlternatives: number;
-}
-
-/**
- * Get optimal STT config for TTS provider
- * This is based on actual TTS output characteristics
+ * Get optimal STT configuration for TTS provider.
+ *
+ * @param ttsProvider - TTS provider used to generate the audio
+ * @param expectedPhrases - Optional phrases to boost recognition accuracy
+ * @returns Optimized STT configuration
+ *
+ * @remarks
+ * **Provider Sample Rates:**
+ * - Google TTS: 24kHz (matches output)
+ * - ElevenLabs: 44.1kHz (high quality)
+ * - Azure: 24kHz
+ * - AWS Polly: 24kHz
+ *
+ * **Optimizations:**
+ * - Uses `latest_short` model for synthesized speech
+ * - Enables automatic punctuation
+ * - Requests 5 alternatives for confidence comparison
+ * - Adds phrase boosting if expected phrases provided
+ *
+ * @example
+ * ```typescript
+ * // Basic configuration
+ * const config = getOptimalConfig('google');
+ *
+ * // With phrase boosting
+ * const configWithPhrases = getOptimalConfig('google', [
+ *   'customer service',
+ *   'technical support',
+ *   'account balance'
+ * ]);
+ *
+ * // Use with STT service
+ * const stt = new StreamingSTTService();
+ * const result = await stt.transcribe(audioBuffer, config);
+ * ```
  */
 export function getOptimalConfig(
   ttsProvider: 'google' | 'elevenlabs' | 'azure' | 'aws',
@@ -47,16 +93,42 @@ export function getOptimalConfig(
     encoding: 'LINEAR16',
     sampleRate: configs[ttsProvider].sampleRate,
     model: 'latest_short', // Best for clear, synthesized speech
-    phraseHints: expectedPhrases,
-    phraseBoost: expectedPhrases && expectedPhrases.length > 0 ? 20 : undefined,
+    speechContexts: expectedPhrases ? [{ phrases: expectedPhrases }] : undefined,
     enableAutomaticPunctuation: true,
     maxAlternatives: 5, // Get top 5 to choose highest confidence
   };
 }
 
 /**
- * Simple audio quality check
- * Only validates the essentials: volume and duration
+ * Validate audio quality for speech recognition.
+ *
+ * @param buffer - Audio buffer to validate (16-bit PCM)
+ * @returns Validation result with issues and metrics
+ *
+ * @remarks
+ * **Validation Checks:**
+ * - **Duration**: Must be at least 100ms
+ * - **Volume**: Between 5% and 95% to avoid clipping
+ * - **Peak Amplitude**: Measured across all samples
+ *
+ * **Common Issues:**
+ * - "Audio too short": Less than 100ms duration
+ * - "Volume too low": Peak below 5% (microphone issue)
+ * - "Volume too high (clipping)": Peak above 95% (distortion)
+ *
+ * @example
+ * ```typescript
+ * const validation = validateAudio(audioBuffer);
+ *
+ * if (!validation.isValid) {
+ *   console.error('Audio validation failed:');
+ *   validation.issues.forEach(issue => console.error(`  - ${issue}`));
+ *   console.log(`Volume: ${validation.volume.toFixed(1)}%`);
+ *   console.log(`Duration: ${validation.duration.toFixed(0)}ms`);
+ * } else {
+ *   console.log('Audio quality: PASS');
+ * }
+ * ```
  */
 export function validateAudio(buffer: Buffer): {
   isValid: boolean;
@@ -96,8 +168,43 @@ export function validateAudio(buffer: Buffer): {
 }
 
 /**
- * Normalize audio volume to optimal level (60-70%)
- * This is the single most important preprocessing step
+ * Normalize audio volume to optimal level for speech recognition.
+ *
+ * @param buffer - Audio buffer to normalize (16-bit PCM)
+ * @param targetVolume - Target volume level (0.0 to 1.0, default: 0.65)
+ * @returns Normalized audio buffer
+ *
+ * @remarks
+ * **Most Important Preprocessing Step**
+ *
+ * Volume normalization significantly improves STT accuracy by:
+ * - Ensuring consistent audio levels
+ * - Preventing clipping and distortion
+ * - Optimizing for speech recognition algorithms
+ *
+ * **Target Range:** 60-70% (0.6-0.7)
+ *
+ * **Behavior:**
+ * - Only normalizes if volume is <10% or >85%
+ * - Maintains dynamic range (no compression)
+ * - Prevents clipping at ±32767 (16-bit max)
+ * - Returns original buffer if already in acceptable range
+ *
+ * @example
+ * ```typescript
+ * // Normalize to default 65% volume
+ * const normalized = normalizeVolume(audioBuffer);
+ *
+ * // Custom target volume
+ * const normalized70 = normalizeVolume(audioBuffer, 0.70);
+ *
+ * // Check if normalization occurred
+ * const validation = validateAudio(audioBuffer);
+ * if (validation.volume < 10 || validation.volume > 85) {
+ *   const normalized = normalizeVolume(audioBuffer);
+ *   console.log('Audio normalized for optimal recognition');
+ * }
+ * ```
  */
 export function normalizeVolume(buffer: Buffer, targetVolume = 0.65): Buffer {
   // Find current peak
@@ -130,8 +237,50 @@ export function normalizeVolume(buffer: Buffer, targetVolume = 0.65): Buffer {
 }
 
 /**
- * Build speech contexts for phrase boosting
- * 20-30% accuracy improvement for expected phrases
+ * Build speech contexts for phrase boosting.
+ *
+ * @param phrases - Array of expected phrases or keywords
+ * @returns Speech contexts array with boost values
+ *
+ * @remarks
+ * **Phrase Boosting Benefits:**
+ * - 20-30% accuracy improvement for expected phrases
+ * - Helps with domain-specific terminology
+ * - Improves recognition of names and technical terms
+ *
+ * **Optimal Boost Value:** 20.0
+ * - Higher values may cause over-boosting
+ * - Lower values have minimal effect
+ *
+ * **Best Practices:**
+ * - Include common variations of phrases
+ * - Add proper nouns and technical terms
+ * - Limit to 50-100 most important phrases
+ * - Use exact expected wording when possible
+ *
+ * @example
+ * ```typescript
+ * // Domain-specific phrases
+ * const contexts = buildSpeechContexts([
+ *   'account number',
+ *   'routing number',
+ *   'balance inquiry',
+ *   'transfer funds'
+ * ]);
+ *
+ * // Names and locations
+ * const nameContexts = buildSpeechContexts([
+ *   'John Smith',
+ *   'New York',
+ *   'Los Angeles'
+ * ]);
+ *
+ * // Use with STT config
+ * const config = {
+ *   ...getOptimalConfig('google'),
+ *   speechContexts: buildSpeechContexts(expectedPhrases)
+ * };
+ * ```
  */
 export function buildSpeechContexts(
   phrases: string[]
@@ -149,7 +298,46 @@ export function buildSpeechContexts(
 }
 
 /**
- * Analyze transcription confidence
+ * Analyze transcription confidence level.
+ *
+ * @param confidence - Confidence score from STT (0.0 to 1.0)
+ * @returns Analysis result with reliability assessment and recommendation
+ *
+ * @remarks
+ * **Confidence Levels:**
+ * - **Excellent** (≥95%): Perfect transcription, production ready
+ * - **Good** (≥90%): Meets reliability target, acceptable for most uses
+ * - **Fair** (≥75%): May have minor errors, review recommended
+ * - **Poor** (<75%): Likely errors, check audio quality or configuration
+ *
+ * **Reliability Threshold:** 90%
+ * - Above 90%: Considered reliable for production use
+ * - Below 90%: Requires human review or re-recording
+ *
+ * @example
+ * ```typescript
+ * const analysis = analyzeConfidence(0.92);
+ *
+ * console.log(`Confidence: ${analysis.level}`);
+ * console.log(`Reliable: ${analysis.isReliable}`);
+ * console.log(`Recommendation: ${analysis.recommendation}`);
+ *
+ * if (!analysis.isReliable) {
+ *   console.warn('Consider improving audio quality or adding phrase hints');
+ * }
+ *
+ * // Handle different confidence levels
+ * if (analysis.level === 'poor') {
+ *   // Re-record or check audio configuration
+ *   await recordAgain();
+ * } else if (analysis.level === 'fair') {
+ *   // Add phrase boosting
+ *   const contexts = buildSpeechContexts(expectedPhrases);
+ * } else {
+ *   // Good to go!
+ *   await processTranscript(transcript);
+ * }
+ * ```
  */
 export function analyzeConfidence(confidence: number): {
   isReliable: boolean;

@@ -1,13 +1,68 @@
 /**
  * Input Validation Utilities
- * Centralized validation logic following best practices
+ *
+ * Centralized validation logic following security and data integrity best practices.
+ * Provides type-safe validation functions for all user inputs and configuration parameters.
+ *
+ * @module utils/validation
+ * @since 1.0.0
+ *
+ * @remarks
+ * This module provides comprehensive validation for:
+ * - **Audio Parameters**: Speaking rate, pitch, volume, sample rate
+ * - **Text Inputs**: Content validation, sanitization, length limits
+ * - **Identifiers**: Language codes, voice names, encoding formats
+ * - **File Paths**: Security validation, traversal prevention
+ * - **API Keys**: Format and length validation
+ * - **JSON Parsing**: Type-safe parsing with error handling
+ *
+ * All validation functions throw `ValidationError` with detailed context on failure.
+ *
+ * @example
+ * ```typescript
+ * import {
+ *   validateText,
+ *   validateLanguageCode,
+ *   validateSpeakingRate,
+ *   safeJSONParse
+ * } from './utils/validation.js';
+ *
+ * // Validate user input
+ * validateText('Hello, world!');
+ * validateLanguageCode('en-US');
+ * validateSpeakingRate(1.0);
+ *
+ * // Safe JSON parsing
+ * const result = safeJSONParse<Config>(jsonString);
+ * if (result.success) {
+ *   console.log('Config:', result.data);
+ * }
+ * ```
  */
 
 import { AUDIO_LIMITS } from '../constants/audio.constants.js';
 import { ValidationError } from '../errors/voice-test.errors.js';
 
 /**
- * Validate speaking rate parameter
+ * Validate speaking rate parameter.
+ *
+ * @param rate - Speaking rate to validate (0.25 to 4.0)
+ * @throws {ValidationError} If rate is invalid or out of range
+ *
+ * @remarks
+ * **Valid Range:** 0.25 to 4.0
+ * - 0.25 = Very slow (25% of normal speed)
+ * - 1.0 = Normal speaking speed
+ * - 4.0 = Very fast (4x normal speed)
+ *
+ * @example
+ * ```typescript
+ * validateSpeakingRate(1.0); // ✓ Valid
+ * validateSpeakingRate(0.5); // ✓ Valid (slower)
+ * validateSpeakingRate(2.0); // ✓ Valid (faster)
+ * validateSpeakingRate(5.0); // ✗ Throws: Out of range
+ * validateSpeakingRate(NaN); // ✗ Throws: Not a number
+ * ```
  */
 export function validateSpeakingRate(rate: number): void {
   if (typeof rate !== 'number' || isNaN(rate)) {
@@ -24,7 +79,25 @@ export function validateSpeakingRate(rate: number): void {
 }
 
 /**
- * Validate pitch parameter
+ * Validate pitch parameter.
+ *
+ * @param pitch - Pitch adjustment to validate (-20.0 to 20.0)
+ * @throws {ValidationError} If pitch is invalid or out of range
+ *
+ * @remarks
+ * **Valid Range:** -20.0 to 20.0 semitones
+ * - Negative values = Lower pitch
+ * - 0.0 = No adjustment
+ * - Positive values = Higher pitch
+ * - ±12 semitones = One octave
+ *
+ * @example
+ * ```typescript
+ * validatePitch(0.0);   // ✓ Valid (no change)
+ * validatePitch(-5.0);  // ✓ Valid (lower pitch)
+ * validatePitch(10.0);  // ✓ Valid (higher pitch)
+ * validatePitch(25.0);  // ✗ Throws: Out of range
+ * ```
  */
 export function validatePitch(pitch: number): void {
   if (typeof pitch !== 'number' || isNaN(pitch)) {
@@ -41,7 +114,29 @@ export function validatePitch(pitch: number): void {
 }
 
 /**
- * Validate volume parameter
+ * Validate volume parameter.
+ *
+ * @param volume - Volume level to validate (0.0 to 1.0)
+ * @param fieldName - Name of the field for error messages (default: 'volume')
+ * @throws {ValidationError} If volume is invalid or out of range
+ *
+ * @remarks
+ * **Valid Range:** 0.0 to 1.0
+ * - 0.0 = Silent
+ * - 0.5 = Half volume
+ * - 1.0 = Full volume
+ *
+ * @example
+ * ```typescript
+ * validateVolume(0.5); // ✓ Valid
+ * validateVolume(0.0); // ✓ Valid (silent)
+ * validateVolume(1.0); // ✓ Valid (full)
+ * validateVolume(1.5); // ✗ Throws: Out of range
+ *
+ * // Custom field name
+ * validateVolume(0.2, 'backgroundVolume');
+ * // Error message will reference 'backgroundVolume'
+ * ```
  */
 export function validateVolume(volume: number, fieldName: string = 'volume'): void {
   if (typeof volume !== 'number' || isNaN(volume)) {
@@ -58,7 +153,34 @@ export function validateVolume(volume: number, fieldName: string = 'volume'): vo
 }
 
 /**
- * Validate text input (not empty, reasonable length)
+ * Validate text input (not empty, reasonable length).
+ *
+ * @param text - Text to validate
+ * @param maxLength - Maximum allowed length (default: 5000)
+ * @throws {ValidationError} If text is invalid, empty, or too long
+ *
+ * @remarks
+ * **Checks:**
+ * - Must be a string
+ * - Cannot be empty or whitespace-only
+ * - Cannot exceed max length
+ *
+ * **Use Cases:**
+ * - TTS input validation
+ * - Question text validation
+ * - User message validation
+ *
+ * @example
+ * ```typescript
+ * validateText('Hello, world!'); // ✓ Valid
+ * validateText(''); // ✗ Throws: Empty
+ * validateText('   '); // ✗ Throws: Whitespace only
+ * validateText('x'.repeat(6000)); // ✗ Throws: Too long
+ *
+ * // Custom max length
+ * validateText('Short message', 100); // ✓ Valid
+ * validateText('Long message...', 10); // ✗ Throws: Exceeds 10 chars
+ * ```
  */
 export function validateText(text: string, maxLength: number = 5000): void {
   if (typeof text !== 'string') {
@@ -75,7 +197,30 @@ export function validateText(text: string, maxLength: number = 5000): void {
 }
 
 /**
- * Validate language code format
+ * Validate language code format.
+ *
+ * @param languageCode - Language code to validate (e.g., 'en-US')
+ * @throws {ValidationError} If language code format is invalid
+ *
+ * @remarks
+ * **Format:** `xx-XX` (ISO 639-1 + ISO 3166-1)
+ * - xx: Lowercase 2-letter language code
+ * - XX: Uppercase 2-letter country code
+ *
+ * **Examples:**
+ * - `en-US`: English (United States)
+ * - `en-GB`: English (United Kingdom)
+ * - `es-ES`: Spanish (Spain)
+ * - `fr-FR`: French (France)
+ *
+ * @example
+ * ```typescript
+ * validateLanguageCode('en-US'); // ✓ Valid
+ * validateLanguageCode('es-ES'); // ✓ Valid
+ * validateLanguageCode('en'); // ✗ Throws: Missing country
+ * validateLanguageCode('EN-US'); // ✗ Throws: Wrong case
+ * validateLanguageCode('eng-USA'); // ✗ Throws: Wrong format
+ * ```
  */
 export function validateLanguageCode(languageCode: string): void {
   if (typeof languageCode !== 'string') {
@@ -95,7 +240,21 @@ export function validateLanguageCode(languageCode: string): void {
 }
 
 /**
- * Validate voice name format
+ * Validate voice name format.
+ *
+ * @param voiceName - Voice name to validate
+ * @throws {ValidationError} If voice name is invalid or empty
+ *
+ * @remarks
+ * Validates that voice name is a non-empty string.
+ * Format depends on TTS provider (e.g., 'en-US-Neural2-F' for Google).
+ *
+ * @example
+ * ```typescript
+ * validateVoiceName('en-US-Neural2-F'); // ✓ Valid
+ * validateVoiceName('en-US-Wavenet-A'); // ✓ Valid
+ * validateVoiceName(''); // ✗ Throws: Empty
+ * ```
  */
 export function validateVoiceName(voiceName: string): void {
   if (typeof voiceName !== 'string') {
@@ -108,7 +267,24 @@ export function validateVoiceName(voiceName: string): void {
 }
 
 /**
- * Validate audio encoding
+ * Validate audio encoding format.
+ *
+ * @param encoding - Audio encoding to validate
+ * @throws {ValidationError} If encoding is not supported
+ *
+ * @remarks
+ * **Supported Formats:**
+ * - MP3: Most common, good compression
+ * - WAV: Uncompressed, highest quality
+ * - OGG: Open format, good compression
+ *
+ * @example
+ * ```typescript
+ * validateAudioEncoding('MP3'); // ✓ Valid
+ * validateAudioEncoding('WAV'); // ✓ Valid
+ * validateAudioEncoding('OGG'); // ✓ Valid
+ * validateAudioEncoding('AAC'); // ✗ Throws: Not supported
+ * ```
  */
 export function validateAudioEncoding(encoding: string): void {
   const validEncodings = ['MP3', 'WAV', 'OGG'];
@@ -123,7 +299,27 @@ export function validateAudioEncoding(encoding: string): void {
 }
 
 /**
- * Validate STT encoding
+ * Validate STT encoding format.
+ *
+ * @param encoding - STT encoding to validate
+ * @throws {ValidationError} If encoding is not supported
+ *
+ * @remarks
+ * **Supported Formats:**
+ * - LINEAR16: 16-bit PCM (most common)
+ * - FLAC: Lossless compression
+ * - MULAW: 8-bit telephone quality
+ * - AMR/AMR_WB: Adaptive multi-rate
+ * - OGG_OPUS: Opus codec
+ * - SPEEX_WITH_HEADER_BYTE: Speex codec
+ * - WEBM_OPUS: WebM container
+ *
+ * @example
+ * ```typescript
+ * validateSTTEncoding('LINEAR16'); // ✓ Valid
+ * validateSTTEncoding('FLAC'); // ✓ Valid
+ * validateSTTEncoding('MP3'); // ✗ Throws: Not supported for STT
+ * ```
  */
 export function validateSTTEncoding(encoding: string): void {
   const validEncodings = [
@@ -147,7 +343,26 @@ export function validateSTTEncoding(encoding: string): void {
 }
 
 /**
- * Validate sample rate
+ * Validate sample rate.
+ *
+ * @param sampleRate - Sample rate in Hz to validate
+ * @throws {ValidationError} If sample rate is not supported
+ *
+ * @remarks
+ * **Supported Rates:**
+ * - 8000 Hz: Telephone quality
+ * - 16000 Hz: Wideband, optimal for STT
+ * - 24000 Hz: High quality
+ * - 32000 Hz: Very high quality
+ * - 44100 Hz: CD quality
+ * - 48000 Hz: Professional audio
+ *
+ * @example
+ * ```typescript
+ * validateSampleRate(16000); // ✓ Valid
+ * validateSampleRate(44100); // ✓ Valid
+ * validateSampleRate(22050); // ✗ Throws: Not in supported list
+ * ```
  */
 export function validateSampleRate(sampleRate: number): void {
   if (typeof sampleRate !== 'number' || isNaN(sampleRate)) {
@@ -166,7 +381,26 @@ export function validateSampleRate(sampleRate: number): void {
 }
 
 /**
- * Validate file path
+ * Validate file path for security.
+ *
+ * @param filePath - File path to validate
+ * @throws {ValidationError} If path is unsafe
+ *
+ * @remarks
+ * **Security Checks:**
+ * - Must be a non-empty string
+ * - Cannot contain `..` (directory traversal)
+ *
+ * **Note:** This is basic validation. Use `validateSafePath` from
+ * secure-exec for comprehensive security checks.
+ *
+ * @example
+ * ```typescript
+ * validateFilePath('./output.wav'); // ✓ Valid
+ * validateFilePath('/tmp/audio.mp3'); // ✓ Valid
+ * validateFilePath('../../../etc/passwd'); // ✗ Throws: Traversal
+ * validateFilePath(''); // ✗ Throws: Empty
+ * ```
  */
 export function validateFilePath(filePath: string): void {
   if (typeof filePath !== 'string') {
@@ -188,7 +422,25 @@ export function validateFilePath(filePath: string): void {
 }
 
 /**
- * Validate API key format
+ * Validate API key format.
+ *
+ * @param apiKey - API key to validate
+ * @throws {ValidationError} If API key is invalid
+ *
+ * @remarks
+ * **Checks:**
+ * - Must be a non-empty string
+ * - Minimum length of 20 characters
+ * - (Google AI keys are typically 39 characters)
+ *
+ * **Note:** This is format validation only, not authentication.
+ *
+ * @example
+ * ```typescript
+ * validateAPIKey('AIzaSyD...38characters...'); // ✓ Valid
+ * validateAPIKey('short'); // ✗ Throws: Too short
+ * validateAPIKey(''); // ✗ Throws: Empty
+ * ```
  */
 export function validateAPIKey(apiKey: string): void {
   if (typeof apiKey !== 'string') {
@@ -210,7 +462,22 @@ export function validateAPIKey(apiKey: string): void {
 }
 
 /**
- * Sanitize text input to prevent injection attacks
+ * Sanitize text input to prevent injection attacks.
+ *
+ * @param text - Text to sanitize
+ * @returns Sanitized text
+ *
+ * @remarks
+ * **Sanitization:**
+ * - Removes control characters (0x00-0x1F, 0x7F)
+ * - Trims whitespace
+ * - Safe for use in commands and logs
+ *
+ * @example
+ * ```typescript
+ * const clean = sanitizeText('Hello\x00World\x1B'); // 'HelloWorld'
+ * const trimmed = sanitizeText('  text  '); // 'text'
+ * ```
  */
 export function sanitizeText(text: string): string {
   // Remove or escape potentially dangerous characters
@@ -222,7 +489,20 @@ export function sanitizeText(text: string): string {
 }
 
 /**
- * Normalize language code to standard format
+ * Normalize language code to standard format.
+ *
+ * @param languageCode - Language code to normalize
+ * @returns Normalized language code (e.g., 'en-US')
+ *
+ * @remarks
+ * Converts to standard format: lowercase language + uppercase country
+ *
+ * @example
+ * ```typescript
+ * normalizeLanguageCode('EN-us'); // 'en-US'
+ * normalizeLanguageCode('Es-ES'); // 'es-ES'
+ * normalizeLanguageCode('invalid'); // 'invalid' (unchanged)
+ * ```
  */
 export function normalizeLanguageCode(languageCode: string): string {
   const parts = languageCode.split('-');
@@ -235,14 +515,36 @@ export function normalizeLanguageCode(languageCode: string): string {
 }
 
 /**
- * Clamp number to range
+ * Clamp number to range.
+ *
+ * @param value - Value to clamp
+ * @param min - Minimum allowed value
+ * @param max - Maximum allowed value
+ * @returns Clamped value
+ *
+ * @example
+ * ```typescript
+ * clamp(5, 0, 10); // 5
+ * clamp(-5, 0, 10); // 0
+ * clamp(15, 0, 10); // 10
+ *
+ * // Ensure volume is in valid range
+ * const volume = clamp(userVolume, 0, 1);
+ * ```
  */
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
 /**
- * Result type for safe JSON parsing
+ * Result type for safe JSON parsing.
+ *
+ * @template T - Expected type of parsed data
+ *
+ * @remarks
+ * Discriminated union for type-safe result handling:
+ * - Success: `{ success: true, data: T }`
+ * - Failure: `{ success: false, error: string }`
  */
 export type ValidationResult<T = unknown> =
   | {
@@ -255,7 +557,38 @@ export type ValidationResult<T = unknown> =
     };
 
 /**
- * Safely parse JSON with typed result
+ * Safely parse JSON with typed result.
+ *
+ * @template T - Expected type of parsed data
+ * @param json - JSON string to parse
+ * @returns Validation result with success/failure status
+ *
+ * @remarks
+ * Never throws - always returns a result object.
+ * Use type guard to check success before accessing data.
+ *
+ * @example
+ * ```typescript
+ * const result = safeJSONParse<{ name: string }>('{"name":"John"}');
+ *
+ * if (result.success) {
+ *   console.log('Name:', result.data.name);
+ * } else {
+ *   console.error('Parse error:', result.error);
+ * }
+ *
+ * // Type-safe handling
+ * interface Config {
+ *   apiKey: string;
+ *   timeout: number;
+ * }
+ *
+ * const configResult = safeJSONParse<Config>(configString);
+ * if (configResult.success) {
+ *   // TypeScript knows result.data is Config
+ *   const config: Config = configResult.data;
+ * }
+ * ```
  */
 export function safeJSONParse<T = unknown>(json: string): ValidationResult<T> {
   try {
@@ -270,21 +603,79 @@ export function safeJSONParse<T = unknown>(json: string): ValidationResult<T> {
 }
 
 /**
- * Check if value is a valid number
+ * Check if value is a valid number.
+ *
+ * @param value - Value to check
+ * @returns True if value is a valid, finite number
+ *
+ * @remarks
+ * Returns false for:
+ * - NaN
+ * - Infinity / -Infinity
+ * - Non-number types
+ *
+ * @example
+ * ```typescript
+ * isValidNumber(42); // true
+ * isValidNumber(3.14); // true
+ * isValidNumber(NaN); // false
+ * isValidNumber(Infinity); // false
+ * isValidNumber('42'); // false
+ * ```
  */
 export function isValidNumber(value: unknown): value is number {
   return typeof value === 'number' && !isNaN(value) && isFinite(value);
 }
 
 /**
- * Check if value is a non-empty string
+ * Check if value is a non-empty string.
+ *
+ * @param value - Value to check
+ * @returns True if value is a non-empty string (after trimming)
+ *
+ * @example
+ * ```typescript
+ * isNonEmptyString('hello'); // true
+ * isNonEmptyString('  text  '); // true
+ * isNonEmptyString(''); // false
+ * isNonEmptyString('   '); // false (whitespace only)
+ * isNonEmptyString(42); // false
+ * ```
  */
 export function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
 /**
- * Validate complete VoiceTestInput object
+ * Validate complete VoiceTestInput object.
+ *
+ * @param input - Voice test input to validate
+ * @throws {ValidationError} If any field is invalid
+ *
+ * @remarks
+ * Validates all fields in one call:
+ * - Required: text, languageCode, voiceName
+ * - Optional: audioEncoding, speakingRate, pitch, backgroundVolume
+ *
+ * @example
+ * ```typescript
+ * const input = {
+ *   text: 'Hello, world!',
+ *   languageCode: 'en-US',
+ *   voiceName: 'en-US-Neural2-F',
+ *   speakingRate: 1.0,
+ *   pitch: 0.0,
+ *   audioEncoding: 'MP3',
+ *   backgroundVolume: 0.2
+ * };
+ *
+ * try {
+ *   validateVoiceTestInput(input);
+ *   // All fields valid, proceed
+ * } catch (error) {
+ *   console.error('Validation failed:', error.message);
+ * }
+ * ```
  */
 export function validateVoiceTestInput(input: {
   text: string;

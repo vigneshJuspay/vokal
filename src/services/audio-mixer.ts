@@ -1,6 +1,29 @@
 /**
  * Lightweight Audio Mixer for TTS
- * Pure JavaScript implementation for mixing speech with background sounds
+ *
+ * Pure JavaScript implementation for mixing speech with background sounds without external dependencies.
+ * Provides WAV file processing, audio sample mixing, resampling, and intelligent mixing configurations.
+ *
+ * @module services/audio-mixer
+ * @since 1.0.0
+ *
+ * @remarks
+ * This service implements PCM audio processing in pure JavaScript:
+ * - Reads and writes WAV files
+ * - Mixes multiple audio streams
+ * - Resamples audio to match sample rates
+ * - Applies volume adjustments and looping
+ * - Provides preset background sounds
+ *
+ * @example
+ * ```typescript
+ * const mixer = new AudioMixerService();
+ * const mixedPath = await mixer.mixAudio(
+ *   './speech.wav',
+ *   'cafe',
+ *   0.2
+ * );
+ * ```
  */
 
 import { promises as fs } from 'fs';
@@ -13,6 +36,7 @@ import {
   VoiceTestError,
   getErrorMessage,
   toError,
+  ErrorCode,
 } from '../types/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,15 +45,46 @@ const __dirname = dirname(__filename);
 // Find project root - go up from dist/src/services to project root
 const projectRoot = resolve(__dirname, '../../../');
 
+/**
+ * Audio Mixer Service for combining speech with background sounds.
+ *
+ * @class
+ * @implements {AudioMixer}
+ *
+ * @remarks
+ * Provides intelligent audio mixing with:
+ * - Multiple preset background sounds
+ * - Automatic sample rate conversion
+ * - Volume normalization and mixing
+ * - Looping and fade effects
+ * - Pure JavaScript implementation (no external binaries)
+ */
 export class AudioMixerService implements AudioMixer {
   private presets: BackgroundSoundPreset[] = [];
   private assetsPath: string;
 
+  /**
+   * Creates a new AudioMixerService instance.
+   * Initializes background sound presets and asset paths.
+   *
+   * @example
+   * ```typescript
+   * const mixer = new AudioMixerService();
+   * const presets = mixer.getAvailablePresets();
+   * console.log('Available sounds:', presets.map(p => p.name));
+   * ```
+   */
   constructor() {
     this.assetsPath = join(projectRoot, 'assets');
     this.initializePresets();
   }
 
+  /**
+   * Initialize background sound presets with default configurations.
+   *
+   * @private
+   * @internal
+   */
   private initializePresets(): void {
     this.presets = [
       {
@@ -77,17 +132,46 @@ export class AudioMixerService implements AudioMixer {
     ];
   }
 
+  /**
+   * Mix speech audio with a background sound.
+   *
+   * @param speechPath - Path to the speech audio file (WAV format)
+   * @param backgroundSound - Name of background sound preset or path to custom audio file
+   * @param backgroundVolume - Optional volume level for background (0.0 to 1.0)
+   * @returns Promise resolving to the path of the mixed audio file
+   *
+   * @throws {VoiceTestError} If files are not found or mixing fails
+   *
+   * @remarks
+   * The mixing process:
+   * 1. Validates input files
+   * 2. Loads both audio files as PCM data
+   * 3. Resamples background to match speech sample rate
+   * 4. Mixes audio samples with proper volume adjustment
+   * 5. Saves result back to the speech file path (overwrites)
+   *
+   * If background sound file is not found, returns original speech path unchanged.
+   *
+   * @example
+   * ```typescript
+   * const mixer = new AudioMixerService();
+   *
+   * // Mix with preset
+   * const mixed1 = await mixer.mixAudio('./speech.wav', 'office', 0.15);
+   *
+   * // Mix with custom file
+   * const mixed2 = await mixer.mixAudio('./speech.wav', './custom-bg.wav', 0.3);
+   * ```
+   */
   async mixAudio(
     speechPath: string,
     backgroundSound: string,
     backgroundVolume?: number
   ): Promise<string> {
     try {
-      console.info(`🎵 Mixing audio: ${backgroundSound}`);
-
       // Check if speech file exists
       if (!(await this.fileExists(speechPath))) {
-        throw new VoiceTestError(`Speech file not found: ${speechPath}`, 'FILE_NOT_FOUND');
+        throw new VoiceTestError(`Speech file not found: ${speechPath}`, ErrorCode.FILE_NOT_FOUND);
       }
 
       // Try to resolve background sound path
@@ -97,25 +181,14 @@ export class AudioMixerService implements AudioMixer {
 
         // Check if background file actually exists
         if (!(await this.fileExists(backgroundPath))) {
-          console.warn(`⚠️ Background sound file not found: ${backgroundPath}`);
-          console.info(`📁 To add background sounds, place audio files in: ${this.assetsPath}`);
-          console.info(`🔄 Continuing with original speech audio only`);
           return speechPath;
         }
       } catch {
-        console.warn(`⚠️ Background sound not available: ${backgroundSound}`);
-        console.info(`💡 Available presets: ${this.presets.map((p) => p.name).join(', ')}`);
-        console.info(`🔄 Continuing with original speech audio only`);
         return speechPath;
       }
 
       // Get optimal mixing configuration
       const mixConfig = this.getOptimalMixingConfig('', backgroundSound, backgroundVolume);
-
-      // Implement actual audio mixing with PCM samples
-      console.info(
-        `🎚️ Mixing with ${backgroundSound} at ${Math.round(mixConfig.backgroundVolume * 100)}% volume`
-      );
 
       // Load both audio files as PCM data
       const speechData = await this.loadWavFile(speechPath);
@@ -127,12 +200,6 @@ export class AudioMixerService implements AudioMixer {
       // Save the mixed result back to the original file location (override)
       await this.saveWavFile(speechPath, mixedData, speechData.sampleRate);
 
-      console.info(`✨ Audio mixed successfully: ${speechPath}`);
-      console.info(
-        `🎚️ Background: ${backgroundSound} (${Math.round(mixConfig.backgroundVolume * 100)}% volume)`
-      );
-      console.info(`🎵 Natural mixing: Consistent background throughout`);
-
       return speechPath;
     } catch (error) {
       if (error instanceof VoiceTestError) {
@@ -141,22 +208,58 @@ export class AudioMixerService implements AudioMixer {
 
       throw new VoiceTestError(
         `Audio mixing failed: ${getErrorMessage(error)}`,
-        'MIXING_FAILED',
+        ErrorCode.MIXING_FAILED,
         toError(error)
       );
     }
   }
 
+  /**
+   * Get all available background sound presets.
+   *
+   * @returns Array of background sound preset configurations
+   *
+   * @example
+   * ```typescript
+   * const presets = mixer.getAvailablePresets();
+   * presets.forEach(preset => {
+   *   console.log(`${preset.name}: ${preset.description}`);
+   *   console.log(`  Volume: ${preset.defaultVolume}, Loop: ${preset.loop}`);
+   * });
+   * ```
+   */
   getAvailablePresets(): BackgroundSoundPreset[] {
     return [...this.presets];
   }
 
+  /**
+   * Get optimal mixing configuration based on content and background type.
+   *
+   * @param text - Speech text (used to infer optimal volume)
+   * @param backgroundSound - Name of the background sound
+   * @param backgroundVolume - Optional explicit volume override
+   * @returns Mixing configuration with volume, fade, and loop settings
+   *
+   * @remarks
+   * Uses AI-driven logic to determine:
+   * - Optimal background volume based on speech content
+   * - Fade-in and fade-out durations
+   * - Whether to loop the background
+   *
+   * @example
+   * ```typescript
+   * const config = mixer.getOptimalMixingConfig(
+   *   'This is urgent!',
+   *   'office'
+   * );
+   * console.log('Recommended volume:', config.backgroundVolume);
+   * ```
+   */
   getOptimalMixingConfig(
     text: string,
     backgroundSound: string,
     backgroundVolume?: number
   ): AudioMixingConfig {
-    // AI-driven optimal mixing parameters based on content and background type
     const preset = this.presets.find((p) => p.name === backgroundSound);
 
     if (preset) {
@@ -177,24 +280,41 @@ export class AudioMixerService implements AudioMixer {
     };
   }
 
+  /**
+   * Resolve background sound name or path to actual file path.
+   *
+   * @param backgroundSound - Preset name or file path
+   * @returns Promise resolving to the actual file path
+   * @throws {VoiceTestError} If background sound is not found
+   *
+   * @private
+   * @internal
+   */
   private async resolveBackgroundPath(backgroundSound: string): Promise<string> {
-    // Check if it's a preset name
     const preset = this.presets.find((p) => p.name === backgroundSound);
     if (preset) {
       return preset.filePath;
     }
 
-    // Check if it's a file path
     if (await this.fileExists(backgroundSound)) {
       return backgroundSound;
     }
 
     throw new VoiceTestError(
       `Background sound not found: ${backgroundSound}. Available presets: ${this.presets.map((p) => p.name).join(', ')}`,
-      'BACKGROUND_NOT_FOUND'
+      ErrorCode.BACKGROUND_NOT_FOUND
     );
   }
 
+  /**
+   * Check if a file exists at the given path.
+   *
+   * @param filePath - Path to check
+   * @returns Promise resolving to true if file exists, false otherwise
+   *
+   * @private
+   * @internal
+   */
   private async fileExists(filePath: string): Promise<boolean> {
     try {
       await fs.access(filePath);
@@ -204,14 +324,31 @@ export class AudioMixerService implements AudioMixer {
     }
   }
 
+  /**
+   * Generate a file path for mixed audio output.
+   *
+   * @param originalPath - Original file path
+   * @returns New path with '_mixed' suffix
+   *
+   * @private
+   * @internal
+   */
   private generateMixedFilePath(originalPath: string): string {
     const ext = extname(originalPath);
     const baseName = originalPath.replace(ext, '');
     return `${baseName}_mixed${ext}`;
   }
 
+  /**
+   * Calculate optimal fade-in duration based on background sound type.
+   *
+   * @param backgroundSound - Name of the background sound
+   * @returns Fade-in duration in seconds
+   *
+   * @private
+   * @internal
+   */
   private calculateOptimalFadeIn(backgroundSound: string): number {
-    // AI logic: Different backgrounds need different fade-in timing
     switch (backgroundSound) {
       case 'static':
       case 'phone':
@@ -227,8 +364,16 @@ export class AudioMixerService implements AudioMixer {
     }
   }
 
+  /**
+   * Calculate optimal fade-out duration based on background sound type.
+   *
+   * @param backgroundSound - Name of the background sound
+   * @returns Fade-out duration in seconds
+   *
+   * @private
+   * @internal
+   */
   private calculateOptimalFadeOut(backgroundSound: string): number {
-    // AI logic: Similar to fade-in but slightly longer for natural endings
     switch (backgroundSound) {
       case 'static':
       case 'phone':
@@ -244,11 +389,24 @@ export class AudioMixerService implements AudioMixer {
     }
   }
 
+  /**
+   * Infer optimal background volume from speech text content.
+   *
+   * @param text - Speech text to analyze
+   * @returns Recommended volume level (0.0 to 1.0)
+   *
+   * @remarks
+   * Uses keyword analysis to determine appropriate volume:
+   * - Lower volume for urgent/important content
+   * - Higher volume for casual conversation
+   * - Moderate volume by default
+   *
+   * @private
+   * @internal
+   */
   private inferOptimalVolume(text: string): number {
-    // AI logic: Analyze text content to determine appropriate background volume
     const textLower = text.toLowerCase();
 
-    // If text suggests urgency or importance, lower background volume
     if (
       textLower.includes('urgent') ||
       textLower.includes('important') ||
@@ -258,7 +416,6 @@ export class AudioMixerService implements AudioMixer {
       return 0.05;
     }
 
-    // If text is casual conversation, higher background volume is acceptable
     if (
       textLower.includes('hello') ||
       textLower.includes('chat') ||
@@ -267,10 +424,20 @@ export class AudioMixerService implements AudioMixer {
       return 0.2;
     }
 
-    // Default moderate volume
     return 0.12;
   }
 
+  /**
+   * Create assets directory if it doesn't exist.
+   *
+   * @returns Promise that resolves when directory is created
+   *
+   * @example
+   * ```typescript
+   * await mixer.createAssetsDirectory();
+   * // Now you can add custom background sound files
+   * ```
+   */
   async createAssetsDirectory(): Promise<void> {
     try {
       await fs.mkdir(this.assetsPath, { recursive: true });
@@ -281,20 +448,30 @@ export class AudioMixerService implements AudioMixer {
   }
 
   /**
-   * Load WAV file and extract PCM audio data
+   * Load WAV file and extract PCM audio data.
+   *
+   * @param filePath - Path to WAV file
+   * @returns Promise resolving to audio data with samples and metadata
+   * @throws {VoiceTestError} If file format is invalid or unsupported
+   *
+   * @remarks
+   * Supports:
+   * - PCM audio format (format code 1)
+   * - 16-bit samples
+   * - Mono or stereo (converts stereo to mono)
+   *
+   * @private
+   * @internal
    */
   private async loadWavFile(filePath: string): Promise<AudioData> {
     const buffer = await fs.readFile(filePath);
 
-    // Basic WAV header parsing
     const dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
 
-    // Check for RIFF header
     if (buffer.toString('ascii', 0, 4) !== 'RIFF') {
-      throw new VoiceTestError(`Invalid WAV file: ${filePath}`, 'INVALID_AUDIO_FORMAT');
+      throw new VoiceTestError(`Invalid WAV file: ${filePath}`, ErrorCode.INVALID_AUDIO_FORMAT);
     }
 
-    // Find the 'fmt ' chunk
     let offset = 12;
     while (offset < buffer.length - 8) {
       const chunkId = buffer.toString('ascii', offset, offset + 4);
@@ -309,11 +486,10 @@ export class AudioMixerService implements AudioMixer {
         if (audioFormat !== 1) {
           throw new VoiceTestError(
             `Unsupported audio format: ${audioFormat}`,
-            'UNSUPPORTED_AUDIO_FORMAT'
+            ErrorCode.UNSUPPORTED_AUDIO_FORMAT
           );
         }
 
-        // Find the data chunk
         let dataOffset = offset + 8 + chunkSize;
         while (dataOffset < buffer.length - 8) {
           const dataChunkId = buffer.toString('ascii', dataOffset, dataOffset + 4);
@@ -323,9 +499,7 @@ export class AudioMixerService implements AudioMixer {
             const audioDataStart = dataOffset + 8;
             const samples: number[] = [];
 
-            // Extract 16-bit PCM samples and convert stereo to mono if needed
             if (numChannels === 1) {
-              // Mono - direct extraction
               for (let i = 0; i < dataChunkSize; i += 2) {
                 if (audioDataStart + i + 1 < buffer.length) {
                   const sample = dataView.getInt16(audioDataStart + i, true);
@@ -333,7 +507,6 @@ export class AudioMixerService implements AudioMixer {
                 }
               }
             } else if (numChannels === 2) {
-              // Stereo - convert to mono by averaging channels
               for (let i = 0; i < dataChunkSize; i += 4) {
                 if (audioDataStart + i + 3 < buffer.length) {
                   const leftSample = dataView.getInt16(audioDataStart + i, true);
@@ -347,7 +520,7 @@ export class AudioMixerService implements AudioMixer {
             return {
               samples,
               sampleRate,
-              channels: 1, // Output as mono
+              channels: 1,
               bitsPerSample,
             };
           }
@@ -357,36 +530,54 @@ export class AudioMixerService implements AudioMixer {
 
         throw new VoiceTestError(
           `No audio data found in WAV file: ${filePath}`,
-          'INVALID_AUDIO_FORMAT'
+          ErrorCode.INVALID_AUDIO_FORMAT
         );
       }
 
       offset += 8 + chunkSize;
     }
 
-    throw new VoiceTestError(`Invalid WAV format in file: ${filePath}`, 'INVALID_AUDIO_FORMAT');
+    throw new VoiceTestError(
+      `Invalid WAV format in file: ${filePath}`,
+      ErrorCode.INVALID_AUDIO_FORMAT
+    );
   }
 
   /**
-   * Mix two audio samples
+   * Mix two audio sample arrays with volume adjustment.
+   *
+   * @param speechData - Speech audio data
+   * @param backgroundData - Background audio data
+   * @param config - Mixing configuration
+   * @returns Mixed audio data
+   * @throws {VoiceTestError} If audio data is invalid
+   *
+   * @remarks
+   * Mixing process:
+   * 1. Resamples background to match speech sample rate
+   * 2. Loops background to match speech length
+   * 3. Applies volume adjustment to background
+   * 4. Mixes samples using proper audio mixing formula
+   * 5. Applies soft clipping to prevent distortion
+   *
+   * @private
+   * @internal
    */
   private mixAudioSamples(
     speechData: AudioData,
     backgroundData: AudioData,
     config: AudioMixingConfig
   ): AudioData {
-    // Defensive checks
     if (!speechData.samples || speechData.samples.length === 0) {
-      throw new VoiceTestError('Speech audio has no samples', 'INVALID_AUDIO_DATA');
+      throw new VoiceTestError('Speech audio has no samples', ErrorCode.INVALID_AUDIO_DATA);
     }
 
     if (!backgroundData.samples || backgroundData.samples.length === 0) {
-      throw new VoiceTestError('Background audio has no samples', 'INVALID_AUDIO_DATA');
+      throw new VoiceTestError('Background audio has no samples', ErrorCode.INVALID_AUDIO_DATA);
     }
 
     const speechSamples = speechData.samples;
 
-    // Convert background to match TTS sample rate
     let backgroundSamples = backgroundData.samples;
     if (backgroundData.sampleRate !== speechData.sampleRate) {
       backgroundSamples = this.resampleAudio(
@@ -396,24 +587,20 @@ export class AudioMixerService implements AudioMixer {
       );
     }
 
-    // Prepare background samples with looping
     backgroundSamples = this.prepareBackgroundSamples(
       { ...backgroundData, samples: backgroundSamples },
       speechSamples.length,
       config
     );
 
-    // Mix the samples
     const mixedSamples: number[] = [];
 
     for (let i = 0; i < speechSamples.length; i++) {
       const speechSample = speechSamples[i];
       const backgroundSample = (backgroundSamples[i] || 0) * config.backgroundVolume;
 
-      // Mix with proper audio mixing formula
       let mixed = speechSample + backgroundSample;
 
-      // Apply soft clipping to prevent distortion
       if (mixed > 32767) {
         mixed = 32767 - (mixed - 32767) * 0.1;
       } else if (mixed < -32768) {
@@ -432,7 +619,15 @@ export class AudioMixerService implements AudioMixer {
   }
 
   /**
-   * Simple linear resampling
+   * Resample audio to a different sample rate using linear interpolation.
+   *
+   * @param samples - Original audio samples
+   * @param fromRate - Original sample rate
+   * @param toRate - Target sample rate
+   * @returns Resampled audio array
+   *
+   * @private
+   * @internal
    */
   private resampleAudio(samples: number[], fromRate: number, toRate: number): number[] {
     if (fromRate === toRate) {
@@ -451,7 +646,6 @@ export class AudioMixerService implements AudioMixer {
       const sample1 = samples[index] || 0;
       const sample2 = samples[index + 1] || sample1;
 
-      // Linear interpolation
       const interpolated = sample1 + (sample2 - sample1) * fraction;
       resampled.push(Math.round(interpolated));
     }
@@ -460,7 +654,15 @@ export class AudioMixerService implements AudioMixer {
   }
 
   /**
-   * Prepare background samples with looping and length matching
+   * Prepare background samples with looping to match target length.
+   *
+   * @param backgroundData - Background audio data
+   * @param targetLength - Target number of samples
+   * @param config - Mixing configuration with loop setting
+   * @returns Prepared background samples array
+   *
+   * @private
+   * @internal
    */
   private prepareBackgroundSamples(
     backgroundData: AudioData,
@@ -470,7 +672,6 @@ export class AudioMixerService implements AudioMixer {
     const backgroundSamples = backgroundData.samples;
 
     if (!config.loop) {
-      // No looping - pad with silence if needed
       const result = [...backgroundSamples];
       while (result.length < targetLength) {
         result.push(0);
@@ -478,7 +679,6 @@ export class AudioMixerService implements AudioMixer {
       return result.slice(0, targetLength);
     }
 
-    // Loop the background audio to match speech length
     const loopedSamples: number[] = [];
     let sourceIndex = 0;
 
@@ -491,7 +691,19 @@ export class AudioMixerService implements AudioMixer {
   }
 
   /**
-   * Apply fade effects to background audio (currently no fades for natural consistency)
+   * Apply fade-in and fade-out effects to audio samples.
+   *
+   * @param samples - Audio samples to process
+   * @param _config - Mixing configuration (currently unused)
+   * @param _sampleRate - Sample rate (currently unused)
+   * @returns Processed audio samples
+   *
+   * @remarks
+   * Currently returns samples unchanged for natural consistency.
+   * Fade effects disabled to maintain realistic ambient sound.
+   *
+   * @private
+   * @internal
    */
   private applyFadeEffects(
     samples: number[],
@@ -499,25 +711,25 @@ export class AudioMixerService implements AudioMixer {
     _sampleRate: number
   ): number[] {
     const result = [...samples];
-
-    // No fade-in: Background sounds should be present from the start, like in real life
-    // No fade-out: Background sounds should continue consistently throughout
-    // This creates more natural and realistic audio mixing
-
     return result;
   }
 
   /**
-   * Determine if background sound should fade out naturally
-   */
-  private shouldApplyFadeOut(_config: AudioMixingConfig): boolean {
-    // Only apply fade out for technical/artificial sounds that should end cleanly
-    // Ambient environments should continue naturally without fade out
-    return false; // For now, disable fade out for all backgrounds for consistency
-  }
-
-  /**
-   * Save mixed audio data as WAV file
+   * Save mixed audio data as WAV file.
+   *
+   * @param filePath - Output file path
+   * @param audioData - Audio data to save
+   * @param sampleRate - Sample rate for the audio
+   * @returns Promise that resolves when file is saved
+   *
+   * @remarks
+   * Creates a properly formatted WAV file with:
+   * - RIFF header
+   * - fmt chunk with audio format information
+   * - data chunk with PCM samples
+   *
+   * @private
+   * @internal
    */
   private async saveWavFile(
     filePath: string,
@@ -529,11 +741,9 @@ export class AudioMixerService implements AudioMixer {
     const dataSize = samples.length * bytesPerSample;
     const fileSize = 36 + dataSize;
 
-    // Create WAV header
     const header = Buffer.alloc(44);
     let offset = 0;
 
-    // RIFF header
     header.write('RIFF', offset);
     offset += 4;
     header.writeUInt32LE(fileSize, offset);
@@ -541,46 +751,51 @@ export class AudioMixerService implements AudioMixer {
     header.write('WAVE', offset);
     offset += 4;
 
-    // fmt chunk
     header.write('fmt ', offset);
     offset += 4;
     header.writeUInt32LE(16, offset);
-    offset += 4; // chunk size
+    offset += 4;
     header.writeUInt16LE(1, offset);
-    offset += 2; // audio format (PCM)
+    offset += 2;
     header.writeUInt16LE(channels, offset);
     offset += 2;
     header.writeUInt32LE(sampleRate, offset);
     offset += 4;
     header.writeUInt32LE(sampleRate * channels * bytesPerSample, offset);
-    offset += 4; // byte rate
+    offset += 4;
     header.writeUInt16LE(channels * bytesPerSample, offset);
-    offset += 2; // block align
+    offset += 2;
     header.writeUInt16LE(bitsPerSample, offset);
     offset += 2;
 
-    // data chunk
     header.write('data', offset);
     offset += 4;
     header.writeUInt32LE(dataSize, offset);
 
-    // Create audio data buffer
     const audioBuffer = Buffer.alloc(dataSize);
     for (let i = 0; i < samples.length; i++) {
       audioBuffer.writeInt16LE(samples[i], i * 2);
     }
 
-    // Combine header and data
     const finalBuffer = Buffer.concat([header, audioBuffer]);
 
     await fs.writeFile(filePath, finalBuffer);
   }
 }
 
-// Audio data interface
-interface AudioData {
+/**
+ * Audio data interface for WAV file processing.
+ *
+ * @interface
+ * @internal
+ */
+type AudioData = {
+  /** Array of 16-bit PCM audio samples */
   samples: number[];
+  /** Sample rate in Hz */
   sampleRate: number;
+  /** Number of audio channels (1 for mono, 2 for stereo) */
   channels: number;
+  /** Bits per sample (typically 16) */
   bitsPerSample: number;
-}
+};

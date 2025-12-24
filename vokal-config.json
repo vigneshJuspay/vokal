@@ -1,0 +1,88 @@
+{
+  "metadata": {
+    "name": "Customer Service Bot Test",
+    "version": "1.0.0",
+    "description": "Tests basic customer service interactions",
+    "author": "Voice Test Team",
+    "createdAt": "2025-12-20T09:09:18.815Z",
+    "tags": ["customer-service", "basic", "english"]
+  },
+  "settings": {
+    "defaultLanguage": "en-US",
+    "defaultVoice": "en-US-Neural2-D",
+    "recordingDuration": 100000,
+    "vadSettings": {
+      "silenceThreshold": 0.02,
+      "silenceDuration": 2000,
+      "speechTimeout": 15000
+    },
+    "ttsProvider": "google-ai",
+    "sttProvider": "google-ai",
+    "aiProvider": "google-ai",
+    "passingScore": 7,
+    "maxRetries": 2,
+    "questionDelay": 0,
+    "playQuestions": true,
+    "backgroundSound": "office",
+    "backgroundVolume": 0.3
+  },
+  "questions": [
+    {
+      "id": "greeting",
+      "question": "Hello! How can I help you today?",
+      "intent": "User should respond with a greeting and indicate they need help or have a question",
+      "expectedElements": [
+        "Polite greeting (hello, hi, good morning, etc.)",
+        "Indication of needing help or having a question",
+        "May mention general topic like account, billing, technical issue"
+      ],
+      "context": "Customer service greeting - checking if user can respond appropriately to open-ended help offer",
+      "sampleResponse": "Hello, I need help with my account",
+      "weight": 8,
+      "required": true,
+      "tags": ["greeting", "help-request"],
+      "settings": {
+        "backgroundSound": "cafe",
+        "backgroundVolume": 0.5
+      }
+    },
+    {
+      "id": "account-info",
+      "question": "Can you please provide your account number?",
+      "intent": "User should provide a specific account number or identifier",
+      "expectedElements": [
+        "Account number or ID",
+        "Numeric or alphanumeric identifier",
+        "Clear indication this is their account reference"
+      ],
+      "context": "Account identification - user should provide specific account details",
+      "sampleResponse": "My account number is 12345",
+      "weight": 10,
+      "required": true,
+      "tags": ["account", "identification", "data-provision"],
+      "settings": {
+        "backgroundSound": "office",
+        "backgroundVolume": 0.4
+      }
+    },
+    {
+      "id": "problem-description",
+      "question": "What seems to be the issue with your account?",
+      "intent": "User should describe a specific problem or issue they're experiencing",
+      "expectedElements": [
+        "Clear description of a problem or issue",
+        "Relates to account access, functionality, or services",
+        "Specific enough to understand the nature of the problem"
+      ],
+      "context": "Problem identification - user should articulate their specific issue clearly",
+      "sampleResponse": "I can't log into my account",
+      "weight": 9,
+      "required": true,
+      "tags": ["problem", "description", "troubleshooting"],
+      "settings": {
+        "backgroundSound": "phone",
+        "backgroundVolume": 1
+      }
+    }
+  ]
+}
