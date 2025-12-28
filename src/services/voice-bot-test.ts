@@ -45,7 +45,12 @@
 import { VoiceInteractionService } from './voice-interaction.js';
 import { AIComparisonService } from './ai-comparison.js';
 import { ConsoleLogger } from '../utils/logger.js';
-import { VoiceTestError, getErrorMessage, toError, safeJSONParse } from '../types/index.js';
+import {
+  VoiceTestError,
+  getErrorMessage,
+  toError,
+  safeJSONParse,
+} from '../types/index.js';
 import { ErrorCode } from '../errors/voice-test.errors.js';
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
@@ -161,19 +166,30 @@ export class VoiceBotTestService {
 
     // Load test configuration
     if (!configPath) {
-      throw new VoiceTestError('Test configuration path is required', ErrorCode.MISSING_CONFIG);
+      throw new VoiceTestError(
+        'Test configuration path is required',
+        ErrorCode.MISSING_CONFIG
+      );
     }
 
     this.config = this.loadTestConfig(configPath);
 
     this.logger.info('🔧 Initializing services with provider configuration...');
-    this.logger.info(`   TTS Provider: ${this.config.settings.ttsProvider || 'google-ai'}`);
-    this.logger.info(`   STT Provider: ${this.config.settings.sttProvider || 'google-ai'}`);
-    this.logger.info(`   AI Provider: ${this.config.settings.aiProvider || 'google-ai'}`);
+    this.logger.info(
+      `   TTS Provider: ${this.config.settings.ttsProvider || 'google-ai'}`
+    );
+    this.logger.info(
+      `   STT Provider: ${this.config.settings.sttProvider || 'google-ai'}`
+    );
+    this.logger.info(
+      `   AI Provider: ${this.config.settings.aiProvider || 'google-ai'}`
+    );
 
     // Initialize services - each handles its own API key from environment variables
     this.reliableVoice = new VoiceInteractionService(this.config.settings);
-    this.aiComparison = AIComparisonService.create(this.config.settings.aiProvider || 'google-ai');
+    this.aiComparison = AIComparisonService.create(
+      this.config.settings.aiProvider || 'google-ai'
+    );
 
     this.logger.info('🚀 Voice Bot Test Service initialized');
     this.logger.info(
@@ -235,8 +251,12 @@ export class VoiceBotTestService {
 
     try {
       this.logger.info('🎯 Starting voice bot test suite...');
-      this.logger.info(`📊 Test: ${this.config.metadata.name} v${this.config.metadata.version}`);
-      this.logger.info(`🎤 Using AI Provider: ${this.config.settings.aiProvider || 'google-ai'}`);
+      this.logger.info(
+        `📊 Test: ${this.config.metadata.name} v${this.config.metadata.version}`
+      );
+      this.logger.info(
+        `🎤 Using AI Provider: ${this.config.settings.aiProvider || 'google-ai'}`
+      );
 
       // Test system components first
       await this.validateSystemComponents();
@@ -244,7 +264,9 @@ export class VoiceBotTestService {
       // Run each question
       for (let i = 0; i < this.config.questions.length; i++) {
         const question = this.config.questions[i];
-        this.logger.info(`\n📝 Question ${i + 1}/${this.config.questions.length}: ${question.id}`);
+        this.logger.info(
+          `\n📝 Question ${i + 1}/${this.config.questions.length}: ${question.id}`
+        );
 
         const questionResult = await this.runSingleQuestion(question, i);
         this.results.push(questionResult);
@@ -253,19 +275,21 @@ export class VoiceBotTestService {
       }
 
       // Wait for all AI analyses to complete before generating final report
-      this.logger.info(`⏳ Waiting for all AI analyses to complete...`);
+      this.logger.info('⏳ Waiting for all AI analyses to complete...');
 
       // Show spinner for AI evaluation
       console.log('\n🤖 Evaluating your responses...');
       const evalSpinner = ora('Analyzing responses with AI...').start();
 
-      const aiPromises = this.results.map((r) => r.aiAnalysisPromise).filter((p) => p);
+      const aiPromises = this.results
+        .map((r) => r.aiAnalysisPromise)
+        .filter((p) => p);
 
       await Promise.all(aiPromises);
 
       evalSpinner.succeed('✅ All responses evaluated!');
 
-      this.logger.info(`✅ All AI analyses completed!`);
+      this.logger.info('✅ All AI analyses completed!');
 
       // Generate final results
       const testResult = this.generateTestResult();
@@ -338,34 +362,54 @@ export class VoiceBotTestService {
         this.logger.info(`🗣️ Playing question: "${question.question}"`);
 
         // Create a FRESH reliable voice service for each question to ensure clean state
-        this.logger.info(`🔄 Creating fresh voice service for question ${questionIndex + 1}...`);
-        const freshVoiceService = new VoiceInteractionService(this.config.settings);
+        this.logger.info(
+          `🔄 Creating fresh voice service for question ${questionIndex + 1}...`
+        );
+        const freshVoiceService = new VoiceInteractionService(
+          this.config.settings
+        );
 
         // Use the reliable voice service for the complete interaction
-        this.logger.info(`🎯 Running voice interaction for question: "${question.question}"`);
+        this.logger.info(
+          `🎯 Running voice interaction for question: "${question.question}"`
+        );
 
-        const voiceResult = await freshVoiceService.runVoiceInteraction(question.question, {
-          language: question.settings?.language ?? this.config.settings.defaultLanguage,
-          voice: question.settings?.voice ?? this.config.settings.defaultVoice,
-          maxRecordingDuration:
-            question.settings?.recordingDuration ?? this.config.settings.recordingDuration,
-          silenceTimeout: this.config.settings.vadSettings.silenceDuration,
-          confidenceThreshold: 0.3, // Reasonable confidence threshold
-          backgroundSound:
-            question.settings?.backgroundSound ?? this.config.settings.backgroundSound,
-          backgroundVolume:
-            question.settings?.backgroundVolume ?? this.config.settings.backgroundVolume,
-          questionDelay: this.config.settings.questionDelay,
-        });
+        const voiceResult = await freshVoiceService.runVoiceInteraction(
+          question.question,
+          {
+            language:
+              question.settings?.language ??
+              this.config.settings.defaultLanguage,
+            voice:
+              question.settings?.voice ?? this.config.settings.defaultVoice,
+            maxRecordingDuration:
+              question.settings?.recordingDuration ??
+              this.config.settings.recordingDuration,
+            silenceTimeout: this.config.settings.vadSettings.silenceDuration,
+            confidenceThreshold: 0.3, // Reasonable confidence threshold
+            backgroundSound:
+              question.settings?.backgroundSound ??
+              this.config.settings.backgroundSound,
+            backgroundVolume:
+              question.settings?.backgroundVolume ??
+              this.config.settings.backgroundVolume,
+            questionDelay: this.config.settings.questionDelay,
+          }
+        );
 
         // Clean up the fresh service immediately after use
-        this.logger.info(`🧹 Cleaning up voice service after question ${questionIndex + 1}...`);
+        this.logger.info(
+          `🧹 Cleaning up voice service after question ${questionIndex + 1}...`
+        );
         freshVoiceService.cleanup();
 
         const questionPlayTime = 0; // TTS timing is handled internally
         const recordingTime = voiceResult.duration ?? 0;
 
-        if (!voiceResult.transcript || voiceResult.transcript.trim().length === 0) {
+        if (
+          !voiceResult.transcript ||
+          voiceResult.transcript.trim().length === 0
+        ) {
           throw new VoiceTestError(
             'No speech detected in user response',
             ErrorCode.NO_SPEECH_DETECTED
@@ -380,7 +424,7 @@ export class VoiceBotTestService {
         );
 
         // Step 3: Start AI analysis in background (don't block)
-        this.logger.info(`🤖 Starting AI analysis in background...`);
+        this.logger.info('🤖 Starting AI analysis in background...');
         const analysisStartTime = Date.now();
 
         // Create result placeholder that will be updated when AI completes
@@ -455,14 +499,20 @@ export class VoiceBotTestService {
         questionResult.aiAnalysisPromise = aiAnalysisPromise;
 
         // Return immediately - don't wait for AI analysis
-        this.logger.info(`➡️ Moving to next question (AI analysis running in background)`);
+        this.logger.info(
+          '➡️ Moving to next question (AI analysis running in background)'
+        );
         return questionResult;
       } catch (error) {
         const errorMessage = getErrorMessage(error);
-        this.logger.error(`❌ Error in question ${question.id}: ${errorMessage}`);
+        this.logger.error(
+          `❌ Error in question ${question.id}: ${errorMessage}`
+        );
 
         if (retries < maxRetries) {
-          this.logger.info(`🔄 Retrying question (attempt ${retries + 2}/${maxRetries + 1})...`);
+          this.logger.info(
+            `🔄 Retrying question (attempt ${retries + 2}/${maxRetries + 1})...`
+          );
           retries++;
           await this.delay(3000);
         } else {
@@ -497,7 +547,10 @@ export class VoiceBotTestService {
     }
 
     // This should never be reached, but TypeScript requires it
-    throw new VoiceTestError('Unexpected end of question execution', ErrorCode.UNEXPECTED_ERROR);
+    throw new VoiceTestError(
+      'Unexpected end of question execution',
+      ErrorCode.UNEXPECTED_ERROR
+    );
   }
 
   /**
@@ -617,8 +670,10 @@ export class VoiceBotTestService {
     const questionsSkipped = totalQuestions - questionsAttempted;
 
     const scores = this.results.map((r) => r.comparison.score);
-    const averageScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-    const passRate = totalQuestions > 0 ? (questionsPassed / totalQuestions) * 100 : 0;
+    const averageScore =
+      scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+    const passRate =
+      totalQuestions > 0 ? (questionsPassed / totalQuestions) * 100 : 0;
     const testPassed = passRate >= 70; // 70% pass rate threshold
 
     const summary: TestSummary = {
@@ -634,18 +689,41 @@ export class VoiceBotTestService {
 
     const performance: PerformanceMetrics = {
       ttsMetrics: {
-        averageGenerationTime: this.calculateAverageTime(this.results, 'questionPlayTime'),
-        totalGenerationTime: this.calculateTotalTime(this.results, 'questionPlayTime'),
-        questionsWithTTS: this.results.filter((r) => r.timing.questionPlayTime > 0).length,
+        averageGenerationTime: this.calculateAverageTime(
+          this.results,
+          'questionPlayTime'
+        ),
+        totalGenerationTime: this.calculateTotalTime(
+          this.results,
+          'questionPlayTime'
+        ),
+        questionsWithTTS: this.results.filter(
+          (r) => r.timing.questionPlayTime > 0
+        ).length,
       },
       sttMetrics: {
-        averageTranscriptionTime: this.calculateAverageTime(this.results, 'transcriptionTime'),
-        totalTranscriptionTime: this.calculateTotalTime(this.results, 'transcriptionTime'),
-        totalRecordingTime: this.calculateTotalTime(this.results, 'recordingTime'),
+        averageTranscriptionTime: this.calculateAverageTime(
+          this.results,
+          'transcriptionTime'
+        ),
+        totalTranscriptionTime: this.calculateTotalTime(
+          this.results,
+          'transcriptionTime'
+        ),
+        totalRecordingTime: this.calculateTotalTime(
+          this.results,
+          'recordingTime'
+        ),
       },
       aiMetrics: {
-        averageAnalysisTime: this.calculateAverageTime(this.results, 'analysisTime'),
-        totalAnalysisTime: this.calculateTotalTime(this.results, 'analysisTime'),
+        averageAnalysisTime: this.calculateAverageTime(
+          this.results,
+          'analysisTime'
+        ),
+        totalAnalysisTime: this.calculateTotalTime(
+          this.results,
+          'analysisTime'
+        ),
         provider: this.config.settings.aiProvider || 'google-ai',
       },
       systemMetrics: {
@@ -686,7 +764,9 @@ export class VoiceBotTestService {
     metric: keyof QuestionResult['timing']
   ): number {
     const times = results.map((r) => r.timing[metric]).filter((t) => t > 0);
-    return times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0;
+    return times.length > 0
+      ? times.reduce((a, b) => a + b, 0) / times.length
+      : 0;
   }
 
   /**
@@ -851,7 +931,10 @@ export class VoiceBotTestService {
    * - Strengths (for passed questions)
    * - Improvements (for failed questions)
    */
-  private saveConversationReport(testResult: TestResult, timestamp: string): void {
+  private saveConversationReport(
+    testResult: TestResult,
+    timestamp: string
+  ): void {
     // Define the ConversationReportEntry type locally to fix ESLint errors
     type ConversationReportEntry = {
       questionId: string;
@@ -877,13 +960,20 @@ export class VoiceBotTestService {
       },
       conversation: testResult.questionResults.map((result) => {
         // Find the original question config to get voice/language/background
-        const questionConfig = this.config.questions.find((q) => q.id === result.questionId);
-        const language = questionConfig?.settings?.language || this.config.settings.defaultLanguage;
-        const voice = questionConfig?.settings?.voice || this.config.settings.defaultVoice;
+        const questionConfig = this.config.questions.find(
+          (q) => q.id === result.questionId
+        );
+        const language =
+          questionConfig?.settings?.language ||
+          this.config.settings.defaultLanguage;
+        const voice =
+          questionConfig?.settings?.voice || this.config.settings.defaultVoice;
         const background =
-          questionConfig?.settings?.backgroundSound || this.config.settings.backgroundSound;
+          questionConfig?.settings?.backgroundSound ||
+          this.config.settings.backgroundSound;
         const backgroundVolume =
-          questionConfig?.settings?.backgroundVolume ?? this.config.settings.backgroundVolume;
+          questionConfig?.settings?.backgroundVolume ??
+          this.config.settings.backgroundVolume;
 
         const isPassed = result.comparison.score === 1;
 
@@ -910,7 +1000,10 @@ export class VoiceBotTestService {
       }),
     };
 
-    const reportPath = join(process.cwd(), `conversation-report-${timestamp}.json`);
+    const reportPath = join(
+      process.cwd(),
+      `conversation-report-${timestamp}.json`
+    );
     writeFileSync(reportPath, JSON.stringify(conversationReport, null, 2));
 
     this.logger.info(`📄 Conversation report saved to: ${reportPath}`);
@@ -939,7 +1032,9 @@ export class VoiceBotTestService {
     this.logger.info(`⏭️ Skipped: ${summary.questionsSkipped}`);
     this.logger.info(`📈 Pass Rate: ${summary.passRate.toFixed(1)}%`);
     this.logger.info(`🎯 Average Score: ${summary.averageScore.toFixed(2)}/1`);
-    this.logger.info(`🏆 Overall Result: ${summary.testPassed ? '✅ PASSED' : '❌ FAILED'}`);
+    this.logger.info(
+      `🏆 Overall Result: ${summary.testPassed ? '✅ PASSED' : '❌ FAILED'}`
+    );
     this.logger.info('═'.repeat(50));
   }
 
@@ -989,13 +1084,17 @@ export class VoiceBotTestService {
     const questionsCompleted = this.results.length;
     const timeElapsed = Date.now() - this.startTime;
     const avgTimePerQuestion = timeElapsed / questionsCompleted;
-    const estimatedTimeRemaining = (totalQuestions - questionsCompleted) * avgTimePerQuestion;
+    const estimatedTimeRemaining =
+      (totalQuestions - questionsCompleted) * avgTimePerQuestion;
 
     return {
       currentQuestionIndex,
       totalQuestions,
       questionsCompleted,
-      currentQuestion: this.config.questions[Math.min(currentQuestionIndex, totalQuestions - 1)],
+      currentQuestion:
+        this.config.questions[
+          Math.min(currentQuestionIndex, totalQuestions - 1)
+        ],
       timeElapsed,
       estimatedTimeRemaining,
     };

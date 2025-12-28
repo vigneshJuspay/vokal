@@ -89,7 +89,9 @@ function isTTSResult(value: unknown): value is TTSResult {
  */
 function decodeTTSResult(value: unknown): TTSResult {
   if (!isTTSResult(value)) {
-    throw new Error('Invalid TTSResult: missing required fields (buffer, format, size)');
+    throw new Error(
+      'Invalid TTSResult: missing required fields (buffer, format, size)'
+    );
   }
   return value;
 }
@@ -168,9 +170,11 @@ export class VoiceTestService {
       provider: provider,
     };
 
-    this.logger.info(`🔧 VoiceTestService initialized with TTS provider: ${provider}`);
+    this.logger.info(
+      `🔧 VoiceTestService initialized with TTS provider: ${provider}`
+    );
     if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      this.logger.info(`🔑 Using service account authentication for TTS`);
+      this.logger.info('🔑 Using service account authentication for TTS');
     }
 
     this.audioMixer = new AudioMixerService();
@@ -213,7 +217,9 @@ export class VoiceTestService {
    */
   async generateSpeech(input: VoiceTestInput): Promise<string> {
     try {
-      this.logger.info(`🎯 Starting TTS generation for: "${input.text.substring(0, 50)}..."`);
+      this.logger.info(
+        `🎯 Starting TTS generation for: "${input.text.substring(0, 50)}..."`
+      );
 
       const ttsOptions: TTSOptions = {
         enabled: true,
@@ -249,7 +255,9 @@ export class VoiceTestService {
       let finalAudioPath = tempPath;
       if (input.backgroundSound) {
         try {
-          this.logger.info(`🎵 Mixing with background sound: ${input.backgroundSound}`);
+          this.logger.info(
+            `🎵 Mixing with background sound: ${input.backgroundSound}`
+          );
           finalAudioPath = await this.audioMixer.mixAudio(
             tempPath,
             input.backgroundSound,
@@ -257,8 +265,12 @@ export class VoiceTestService {
           );
           this.logger.info(`🎼 Mixed audio created: ${finalAudioPath}`);
         } catch (mixError) {
-          this.logger.warn(`⚠️ Background mixing failed: ${getErrorMessage(mixError)}`);
-          this.logger.info(`🔄 Continuing with original speech without background`);
+          this.logger.warn(
+            `⚠️ Background mixing failed: ${getErrorMessage(mixError)}`
+          );
+          this.logger.info(
+            '🔄 Continuing with original speech without background'
+          );
         }
       }
 
@@ -271,23 +283,29 @@ export class VoiceTestService {
       if (input.play) {
         try {
           await playAudio(finalAudioPath);
-          this.logger.info(`🔊 Audio played successfully`);
+          this.logger.info('🔊 Audio played successfully');
         } catch (playError) {
-          this.logger.warn(`⚠️ Failed to play audio: ${getErrorMessage(playError)}`);
+          this.logger.warn(
+            `⚠️ Failed to play audio: ${getErrorMessage(playError)}`
+          );
         }
       }
 
-      this.logger.info(`✅ Voice Test process completed successfully`);
+      this.logger.info('✅ Voice Test process completed successfully');
       this.logger.info(`📁 Final audio file: ${finalAudioPath}`);
 
       return finalAudioPath;
     } catch (error) {
       if (error instanceof VoiceTestError) {
-        this.logger.error(`❌ Voice Test Error [${error.code}]: ${error.message}`);
+        this.logger.error(
+          `❌ Voice Test Error [${error.code}]: ${error.message}`
+        );
         throw error;
       }
 
-      this.logger.error(`❌ Unexpected error during voice generation: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `❌ Unexpected error during voice generation: ${getErrorMessage(error)}`
+      );
       throw new VoiceTestError(
         `Voice generation failed: ${getErrorMessage(error)}`,
         ErrorCode.GENERATION_FAILED,
@@ -324,14 +342,21 @@ export class VoiceTestService {
    * console.log('Was played:', result.wasPlayed);
    * ```
    */
-  async generateSpeechDetailed(input: VoiceTestInput): Promise<VoiceTestResponse> {
+  async generateSpeechDetailed(
+    input: VoiceTestInput
+  ): Promise<VoiceTestResponse> {
     const startTime = Date.now();
 
     try {
       const ttsOptions: TTSOptions = {
         enabled: true,
         voice: input.voiceName,
-        format: (input.audioEncoding?.toLowerCase() as 'mp3' | 'wav' | 'ogg' | 'opus') || 'mp3',
+        format:
+          (input.audioEncoding?.toLowerCase() as
+            | 'mp3'
+            | 'wav'
+            | 'ogg'
+            | 'opus') || 'mp3',
         speed: input.speakingRate || 1.0,
         pitch: input.pitch || 0.0,
       };
@@ -371,7 +396,9 @@ export class VoiceTestService {
           finalPath = mixedPath;
           mixedAudio = true;
         } catch (mixError) {
-          this.logger.warn(`Background mixing failed: ${getErrorMessage(mixError)}`);
+          this.logger.warn(
+            `Background mixing failed: ${getErrorMessage(mixError)}`
+          );
         }
       }
 
@@ -386,9 +413,11 @@ export class VoiceTestService {
         try {
           await playAudio(finalPath);
           wasPlayed = true;
-          this.logger.info(`🔊 Audio played successfully`);
+          this.logger.info('🔊 Audio played successfully');
         } catch (playError) {
-          this.logger.warn(`Failed to play audio: ${getErrorMessage(playError)}`);
+          this.logger.warn(
+            `Failed to play audio: ${getErrorMessage(playError)}`
+          );
         }
       }
 
@@ -435,7 +464,9 @@ export class VoiceTestService {
    * ```
    */
   getAvailableVoices(_languageCode?: string): GoogleVoice[] {
-    this.logger.warn('getAvailableVoices may need updates for new Neurolink API');
+    this.logger.warn(
+      'getAvailableVoices may need updates for new Neurolink API'
+    );
     return [];
   }
 
@@ -492,7 +523,10 @@ export class VoiceTestService {
       // Validate file path to prevent injection
       const resolvedPath = resolve(filePath);
       if (!existsSync(resolvedPath)) {
-        throw new VoiceTestError(`Audio file not found: ${filePath}`, ErrorCode.FILE_NOT_FOUND);
+        throw new VoiceTestError(
+          `Audio file not found: ${filePath}`,
+          ErrorCode.FILE_NOT_FOUND
+        );
       }
 
       // Use spawn with array arguments to prevent command injection
@@ -606,7 +640,9 @@ export class VoiceTestService {
 
       return true;
     } catch (error) {
-      this.logger.error(`Audio playback test failed: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `Audio playback test failed: ${getErrorMessage(error)}`
+      );
       return false;
     }
   }
@@ -629,7 +665,9 @@ export class VoiceTestService {
     return {
       platform: process.platform,
       nodeVersion: process.version,
-      backgroundSounds: this.audioMixer.getAvailablePresets().map((p) => p.name),
+      backgroundSounds: this.audioMixer
+        .getAvailablePresets()
+        .map((p) => p.name),
       mixer: 'AudioMixerService',
       ttsProvider: 'Neurolink TTS SDK',
       sttProvider: 'Google Cloud Speech-to-Text (via StreamingSTTService)',

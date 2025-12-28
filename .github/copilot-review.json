@@ -1,0 +1,70 @@
+{
+  "$schema": "https://raw.githubusercontent.com/github/copilot-review-action/main/schema/config.json",
+  "version": "1.0.0",
+  "enabled": true,
+  "auto_review": {
+    "enabled": true,
+    "on_pull_request": true,
+    "on_push": false
+  },
+  "review_settings": {
+    "max_files": 50,
+    "max_lines_per_file": 1000,
+    "exclude_patterns": [
+      "*.min.js",
+      "*.min.css",
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      "*.lock",
+      "*.log"
+    ],
+    "include_patterns": [
+      "*.js",
+      "*.ts",
+      "*.jsx",
+      "*.tsx",
+      "*.py",
+      "*.java",
+      "*.go",
+      "*.rs",
+      "*.php",
+      "*.rb",
+      "*.c",
+      "*.cpp",
+      "*.cs",
+      "*.md"
+    ]
+  },
+  "comment_settings": {
+    "style": "inline",
+    "auto_resolve": false,
+    "require_human_approval": true,
+    "max_comments_per_review": 25
+  },
+  "focus_areas": [
+    "security",
+    "performance",
+    "code_quality",
+    "best_practices",
+    "documentation",
+    "testing"
+  ],
+  "custom_prompts": {
+    "security_review": "Review this code for potential security vulnerabilities, focusing on input validation, authentication, authorization, and data handling.",
+    "performance_review": "Analyze this code for performance issues, including algorithmic complexity, memory usage, and potential bottlenecks.",
+    "code_quality": "Evaluate code quality including readability, maintainability, adherence to coding standards, and proper error handling."
+  },
+  "integrations": {
+    "github_checks": true,
+    "slack_notifications": false,
+    "email_notifications": false
+  },
+  "project_context": {
+    "name": "vokal",
+    "description": "Production voice bot framework with TTS, STT, and AI evaluation using Neurolink",
+    "language": "{{repoType}}",
+    "framework": "auto-detect"
+  }
+}

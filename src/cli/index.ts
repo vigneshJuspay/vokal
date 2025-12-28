@@ -30,11 +30,6 @@ import chalk from 'chalk';
 import ora, { Ora } from 'ora';
 import { config as dotenvConfig } from 'dotenv';
 
-// Node.js built-in modules
-import { readFileSync, writeFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
 // Internal services
 import { VoiceTestService } from '../services/voice-test.js';
 import { VoiceBotTestService } from '../services/voice-bot-test.js';
@@ -42,7 +37,6 @@ import { VoiceBotTestService } from '../services/voice-bot-test.js';
 // Internal types and errors
 import { VoiceTestError, SAMPLE_TEST_CONFIG } from '../types/index.js';
 import type {
-  PackageJson,
   GenerateCommandArgs,
   VoicesCommandArgs,
   TestAudioCommandArgs,
@@ -51,14 +45,10 @@ import type {
   Voice,
   BackgroundSound,
 } from '../types/index.js';
+import { writeFileSync } from 'fs';
 
 // Load environment variables from .env file
 dotenvConfig();
-
-// Constants
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const PACKAGE_JSON_PATH = join(__dirname, '../../../package.json');
 
 // Vokal ASCII banner
 const VOKAL_BANNER = `
@@ -77,31 +67,6 @@ ${chalk.cyan('╚═════════════════════
 // ============================================================================
 // Utility Functions
 // ============================================================================
-
-/**
- * Safely parses the package.json file and extracts version information.
- *
- * @param content - Raw JSON string content from package.json file
- * @returns Parsed package.json object with version information
- *
- * @throws {Error} If the JSON is invalid or doesn't conform to expected structure
- *
- * @example
- * ```typescript
- * const content = readFileSync('./package.json', 'utf-8');
- * const pkg = parsePackageJson(content);
- * console.log(pkg.version); // "1.0.0"
- * ```
- */
-function parsePackageJson(content: string): PackageJson {
-  const obj: unknown = JSON.parse(content);
-  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
-    throw new Error('Invalid package.json format');
-  }
-  return {
-    version: String(Reflect.get(obj, 'version') || '1.0.0'),
-  };
-}
 
 /**
  * Type guard to check if an unknown value is an Error instance.
@@ -203,7 +168,9 @@ function isVoice(item: unknown): item is Voice {
 function handleError(error: unknown, context: string = 'Vokal'): never {
   const err = toError(error);
   if (err instanceof VoiceTestError) {
-    console.error(chalk.red(`❌ ${context} Error [${err.code}]: ${err.message}`));
+    console.error(
+      chalk.red(`❌ ${context} Error [${err.code}]: ${err.message}`)
+    );
   } else {
     console.error(chalk.red(`❌ ${context} Error: ${err.message}`));
   }
@@ -233,7 +200,11 @@ function handleError(error: unknown, context: string = 'Vokal'): never {
  * }
  * ```
  */
-function stopSpinner(spinner: Ora | null, success: boolean, message: string): void {
+function stopSpinner(
+  spinner: Ora | null,
+  success: boolean,
+  message: string
+): void {
   if (!spinner) {
     return;
   }
@@ -278,7 +249,9 @@ function stopSpinner(spinner: Ora | null, success: boolean, message: string): vo
  * vokal voice generate "Fast speech" --voice en-US-Neural2-A --rate 1.5 --pitch 5.0 --debug
  * ```
  */
-async function handleGenerateCommand(argv: ArgumentsCamelCase<GenerateCommandArgs>): Promise<void> {
+async function handleGenerateCommand(
+  argv: ArgumentsCamelCase<GenerateCommandArgs>
+): Promise<void> {
   const spinner = argv.quiet ? null : ora('🎤 Generating speech...').start();
 
   try {
@@ -324,10 +297,10 @@ async function handleGenerateCommand(argv: ArgumentsCamelCase<GenerateCommandArg
       console.log(`📊 File size: ${(response.fileSize / 1024).toFixed(2)} KB`);
       console.log(`⏱️ Generation time: ${response.generationTime}ms`);
       if (response.mixedAudio) {
-        console.log(`🎵 Background audio: Mixed`);
+        console.log('🎵 Background audio: Mixed');
       }
       if (response.wasPlayed) {
-        console.log(`🔊 Audio: Played successfully`);
+        console.log('🔊 Audio: Played successfully');
       }
     }
 
@@ -370,15 +343,21 @@ async function handleGenerateCommand(argv: ArgumentsCamelCase<GenerateCommandArg
  * vokal voices en-IN --format json
  * ```
  */
-function handleVoicesCommand(argv: ArgumentsCamelCase<VoicesCommandArgs>): void {
-  const spinner = argv.quiet ? null : ora('🔍 Fetching available voices...').start();
+function handleVoicesCommand(
+  argv: ArgumentsCamelCase<VoicesCommandArgs>
+): void {
+  const spinner = argv.quiet
+    ? null
+    : ora('🔍 Fetching available voices...').start();
 
   try {
     const voiceTest = new VoiceTestService(argv.apiKey);
     const voicesResult: unknown = voiceTest.getAvailableVoices(argv.language);
 
     // Type-safe voice filtering
-    const voices: Voice[] = Array.isArray(voicesResult) ? voicesResult.filter(isVoice) : [];
+    const voices: Voice[] = Array.isArray(voicesResult)
+      ? voicesResult.filter(isVoice)
+      : [];
 
     stopSpinner(
       spinner,
@@ -394,7 +373,9 @@ function handleVoicesCommand(argv: ArgumentsCamelCase<VoicesCommandArgs>): void 
     // Text format output
     if (!argv.quiet) {
       console.log(
-        chalk.blue(`\n🎤 Available Voices${argv.language ? ` (${argv.language})` : ''}:`)
+        chalk.blue(
+          `\n🎤 Available Voices${argv.language ? ` (${argv.language})` : ''}:`
+        )
       );
       console.log('='.repeat(50));
     }
@@ -455,7 +436,9 @@ function handleBackgroundsCommand(): void {
 
     backgrounds.forEach((bg: BackgroundSound) => {
       console.log(`${chalk.bold(bg.name)}: ${bg.description}`);
-      console.log(`   Volume: ${bg.defaultVolume} | Loop: ${bg.loop ? 'Yes' : 'No'}`);
+      console.log(
+        `   Volume: ${bg.defaultVolume} | Loop: ${bg.loop ? 'Yes' : 'No'}`
+      );
       console.log('');
     });
 
@@ -557,7 +540,9 @@ async function handleTestAudioCommand(
  * vokal play /path/to/audio.mp3
  * ```
  */
-async function handlePlayCommand(argv: ArgumentsCamelCase<PlayCommandArgs>): Promise<void> {
+async function handlePlayCommand(
+  argv: ArgumentsCamelCase<PlayCommandArgs>
+): Promise<void> {
   const spinner = ora(`🔊 Playing audio: ${argv.file}`).start();
 
   try {
@@ -612,7 +597,9 @@ async function handlePlayCommand(argv: ArgumentsCamelCase<PlayCommandArgs>): Pro
  * vokal test --quiet
  * ```
  */
-async function handleTestCommand(argv: ArgumentsCamelCase<TestCommandArgs>): Promise<void> {
+async function handleTestCommand(
+  argv: ArgumentsCamelCase<TestCommandArgs>
+): Promise<void> {
   // Print banner
   console.log(VOKAL_BANNER);
 
@@ -621,8 +608,12 @@ async function handleTestCommand(argv: ArgumentsCamelCase<TestCommandArgs>): Pro
     try {
       const configPath = argv.config || './vokal-config.json';
       writeFileSync(configPath, JSON.stringify(SAMPLE_TEST_CONFIG, null, 2));
-      console.log(chalk.green(`✅ Sample configuration saved to: ${configPath}`));
-      console.log(chalk.yellow('💡 Edit the configuration file and run: vokal test'));
+      console.log(
+        chalk.green(`✅ Sample configuration saved to: ${configPath}`)
+      );
+      console.log(
+        chalk.yellow('💡 Edit the configuration file and run: vokal test')
+      );
       return;
     } catch (error) {
       handleError(error, 'Configuration Save');
@@ -636,7 +627,9 @@ async function handleTestCommand(argv: ArgumentsCamelCase<TestCommandArgs>): Pro
     process.env.VOKAL_LOG_LEVEL = 'VERBOSE';
   }
 
-  const spinner = argv.quiet ? null : ora('🤖 Initializing voice bot test suite...').start();
+  const spinner = argv.quiet
+    ? null
+    : ora('🤖 Initializing voice bot test suite...').start();
 
   try {
     const testService = VoiceBotTestService.create(argv.config);
@@ -663,8 +656,12 @@ async function handleTestCommand(argv: ArgumentsCamelCase<TestCommandArgs>): Pro
       console.log(
         `🎯 Score: ${testResult.summary.questionsPassed}/${testResult.summary.totalQuestions} questions correct`
       );
-      console.log(`📊 Average Score: ${(testResult.summary.averageScore * 100).toFixed(0)}%`);
-      console.log(`⏱️ Total Time: ${(testResult.metadata.totalTime / 1000).toFixed(1)}s`);
+      console.log(
+        `📊 Average Score: ${(testResult.summary.averageScore * 100).toFixed(0)}%`
+      );
+      console.log(
+        `⏱️ Total Time: ${(testResult.metadata.totalTime / 1000).toFixed(1)}s`
+      );
     }
 
     if (argv.debug) {
@@ -776,13 +773,10 @@ ${chalk.gray('For more help on any command:')}
  * ```
  */
 function initializeCliParser(): ReturnType<typeof yargs> {
-  const packageJson = parsePackageJson(readFileSync(PACKAGE_JSON_PATH, 'utf-8'));
-
   return (
     yargs(hideBin(process.argv))
       .scriptName('vokal')
       .usage('Usage: $0 <command> [options]')
-      .version(packageJson.version)
       .help()
       .alias('h', 'help')
       .alias('V', 'version')
@@ -820,7 +814,8 @@ function initializeCliParser(): ReturnType<typeof yargs> {
                   .options({
                     voice: {
                       type: 'string',
-                      description: 'Voice name (e.g., en-US-Neural2-D, en-IN-Neural2-B)',
+                      description:
+                        'Voice name (e.g., en-US-Neural2-D, en-IN-Neural2-B)',
                       demandOption: true,
                     },
                     lang: {

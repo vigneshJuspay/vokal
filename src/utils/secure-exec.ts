@@ -43,8 +43,15 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { createComponentLogger } from './logger.js';
-import { ValidationError, getErrorMessage } from '../errors/voice-test.errors.js';
-import type { ExecOptions, ExecResult, AudioToolCheck } from '../types/index.js';
+import {
+  ValidationError,
+  getErrorMessage,
+} from '../errors/voice-test.errors.js';
+import type {
+  ExecOptions,
+  ExecResult,
+  AudioToolCheck,
+} from '../types/index.js';
 
 const execAsync = promisify(exec);
 const logger = createComponentLogger('SecureExec');
@@ -56,7 +63,14 @@ const logger = createComponentLogger('SecureExec');
  * @constant
  * @internal
  */
-const ALLOWED_COMMANDS = new Set(['which', 'sox', 'rec', 'arecord', 'node', 'npm']);
+const ALLOWED_COMMANDS = new Set([
+  'which',
+  'sox',
+  'rec',
+  'arecord',
+  'node',
+  'npm',
+]);
 
 /**
  * Sanitize command to prevent injection attacks.
@@ -160,7 +174,10 @@ function validateCommand(command: string): void {
  * });
  * ```
  */
-export async function safeExec(command: string, options: ExecOptions = {}): Promise<ExecResult> {
+export async function safeExec(
+  command: string,
+  options: ExecOptions = {}
+): Promise<ExecResult> {
   const sanitized = sanitizeCommand(command);
   validateCommand(sanitized);
 
@@ -181,7 +198,12 @@ export async function safeExec(command: string, options: ExecOptions = {}): Prom
       exitCode: 0,
     };
   } catch (error: unknown) {
-    const err = error as { stdout?: Buffer; stderr?: Buffer; message?: string; code?: number };
+    const err = error as {
+      stdout?: Buffer;
+      stderr?: Buffer;
+      message?: string;
+      code?: number;
+    };
     return {
       stdout: err.stdout?.toString().trim() || '',
       stderr: err.stderr?.toString().trim() || err.message || '',
@@ -222,7 +244,8 @@ export async function safeExec(command: string, options: ExecOptions = {}): Prom
 export async function commandExists(command: string): Promise<boolean> {
   try {
     const platform = process.platform;
-    const checkCommand = platform === 'win32' ? `where ${command}` : `which ${command}`;
+    const checkCommand =
+      platform === 'win32' ? `where ${command}` : `which ${command}`;
 
     const result = await safeExec(checkCommand, { timeout: 5000 });
     return result.exitCode === 0 && result.stdout.length > 0;
@@ -275,7 +298,9 @@ export async function getCommandVersion(
 
     return '';
   } catch (error) {
-    logger.debug(`Could not get version for '${command}': ${getErrorMessage(error)}`);
+    logger.debug(
+      `Could not get version for '${command}': ${getErrorMessage(error)}`
+    );
     return '';
   }
 }
@@ -462,7 +487,11 @@ export function validateSafePath(filePath: string): void {
   }
 
   if (filePath.includes('\0')) {
-    throw new ValidationError('File path cannot contain null bytes', 'filePath', filePath);
+    throw new ValidationError(
+      'File path cannot contain null bytes',
+      'filePath',
+      filePath
+    );
   }
 }
 
@@ -506,7 +535,9 @@ export function validateSafePath(filePath: string): void {
  * });
  * ```
  */
-export function sanitizeEnv(env: Record<string, string>): Record<string, string> {
+export function sanitizeEnv(
+  env: Record<string, string>
+): Record<string, string> {
   const sanitized: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(env)) {

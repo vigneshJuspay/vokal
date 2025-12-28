@@ -9,7 +9,8 @@ export const AUDIO_ENCODING = {
   OGG: 'OGG',
 } as const;
 
-export type AudioEncoding = (typeof AUDIO_ENCODING)[keyof typeof AUDIO_ENCODING];
+export type AudioEncoding =
+  (typeof AUDIO_ENCODING)[keyof typeof AUDIO_ENCODING];
 
 export const STT_ENCODING = {
   LINEAR16: 'LINEAR16',

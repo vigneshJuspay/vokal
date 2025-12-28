@@ -1,0 +1,31 @@
+{
+  "title": "gitleaks config for vokal",
+  "extend": {
+    "useDefault": true
+  },
+  "allowlist": {
+    "description": "Allowlist for vokal",
+    "paths": [
+      ".gitleaksrc.json",
+      "package-lock.json",
+      "yarn.lock",
+      "pnpm-lock.yaml"
+    ],
+    "regexes": [
+      "example",
+      "test",
+      "mock",
+      "fake",
+      "dummy"
+    ],
+    "stopwords": [
+      "example",
+      "test",
+      "mock",
+      "fake",
+      "dummy",
+      "sample",
+      "placeholder"
+    ]
+  }
+}

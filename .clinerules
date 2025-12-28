@@ -1,0 +1,374 @@
+# Vokal - Voice Bot Testing Framework
+
+# Production-ready voice bot framework with TTS, STT, and AI evaluation using Neurolink
+
+> **📚 Project Context**: See `memory-bank/` for complete project history
+> **🎯 Framework**: TypeScript voice bot testing with Google Cloud Speech APIs
+> **📦 Package**: @juspay/vokal
+
+---
+
+## 🏗️ ARCHITECTURE
+
+### **Project Structure**
+
+```
+vokal/
+├── src/
+│   ├── index.ts                    # Main exports
+│   ├── cli/                        # CLI interface
+│   │   └── index.ts               # vokal command
+│   ├── services/                   # Core voice services
+│   │   ├── voice-test.ts          # TTS generation with Neurolink
+│   │   ├── voice-interaction.ts   # Complete voice pipeline
+│   │   ├── voice-bot-test.ts      # Test orchestration
+│   │   ├── ai-comparison.ts       # AI evaluation with Gemini
+│   │   ├── audio-mixer.ts         # Background audio mixing
+│   │   └── audio-recording.ts     # Microphone capture
+│   ├── providers/                  # STT provider handlers
+│   │   ├── google-ai-stt.handler.ts
+│   │   ├── stt-handler-manager.ts
+│   │   └── stt-registry.ts
+│   ├── types/                      # TypeScript definitions
+│   ├── utils/                      # Utilities & helpers
+│   ├── constants/                  # Audio configuration
+│   └── errors/                     # Error handling
+├── assets/                         # Background audio files
+│   ├── office-ambience.wav
+│   ├── cafe-ambience.wav
+│   ├── nature-sounds.wav
+│   ├── rain-light.wav
+│   ├── phone-static.wav
+│   └── crowd-distant.wav
+├── examples/                       # Sample configurations
+│   └── sample-config.json
+└── dist/                          # Compiled output
+```
+
+### **Voice Processing Pipeline**
+
+```
+TTS (Neurolink) → Audio Mixing → Playback → STT (Google) → AI Evaluation (Gemini)
+      ↓               ↓              ↓           ↓                ↓
+  Text Input    Background      Speaker      Transcript      Score/Analysis
+                 Sound
+```
+
+### **Key Architecture Principles**
+
+- **Provider-Agnostic Design**: Handler pattern for STT providers
+- **Pure TypeScript**: ESM modules with NodeNext resolution
+- **Streaming Audio**: Real-time STT with Voice Activity Detection
+- **AI-Powered Evaluation**: Semantic response validation with Gemini
+- **Security First**: Input validation, sanitization, secure execution
+
+---
+
+## 🛠️ DEVELOPMENT WORKFLOW
+
+### **Setup**
+
+```bash
+# Clone and install
+git clone https://github.com/juspay/vokal.git
+cd vokal
+npm install
+
+# Environment setup
+cp .env.example .env
+# Add your Google Cloud credentials:
+# - GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+# OR
+# - GOOGLE_AI_API_KEY=your_api_key
+
+# Build
+npm run build
+```
+
+### **Development Commands**
+
+```bash
+npm run dev              # Watch mode (tsc --watch)
+npm run build            # Clean build
+npm run clean            # Remove dist/
+npm start                # Run compiled code
+npm run cli              # Run CLI directly
+
+# Code Quality
+npm run lint             # ESLint check
+npm run lint:fix         # Auto-fix lint issues
+npm run format           # Prettier format
+npm run format:check     # Check formatting
+npm run typecheck        # TypeScript type check
+npm run validate         # Lint + format check
+npm run validate:all     # Full validation + tests
+
+# Testing (coming soon)
+npm test                 # Run tests
+npm run test:watch       # Watch mode
+npm run test:coverage    # Coverage report
+
+# Documentation (coming soon)
+npm run docs:build       # Build MkDocs
+npm run docs:serve       # Serve docs locally
+npm run docs:gh-deploy   # Deploy to GitHub Pages
+```
+
+---
+
+## 🎤 CLI USAGE
+
+### **Voice Generation**
+
+```bash
+# Basic TTS
+vokal voice generate "Hello, world!" --voice en-US-Neural2-F --lang en-US
+
+# With background audio
+vokal voice generate "Welcome" --voice en-US-Neural2-D --bg cafe --bgvol 0.2 --play
+
+# Advanced options
+vokal voice generate "Fast speech" --voice en-US-Neural2-A --rate 1.5 --pitch 5.0
+```
+
+### **Voice Management**
+
+```bash
+# List available voices
+vokal voices                    # All voices
+vokal voices en-US             # US English voices
+vokal voices en-IN --format json
+
+# List background sounds
+vokal backgrounds
+
+# Test audio playback
+vokal test-audio
+vokal play ./output.wav
+```
+
+### **Voice Bot Testing**
+
+```bash
+# Create sample config
+vokal test --save-sample
+
+# Run test suite
+vokal test ./config.json
+
+# With options
+vokal test --provider google-ai --debug --verbose
+```
+
+---
+
+## 🔧 TESTING STRATEGY
+
+### **Test Configuration Format**
+
+```json
+{
+  "metadata": {
+    "name": "Voice Bot Test Suite",
+    "version": "1.0.0",
+    "description": "Test voice interactions"
+  },
+  "settings": {
+    "defaultLanguage": "en-US",
+    "defaultVoice": "en-US-Neural2-D",
+    "recordingDuration": 10000,
+    "passingScore": 0.7,
+    "sttProvider": "google-ai",
+    "ttsProvider": "google-ai",
+    "aiProvider": "google-ai",
+    "vadSettings": {
+      "silenceThreshold": 0.02,
+      "silenceDuration": 2000,
+      "speechTimeout": 10000
+    }
+  },
+  "questions": [
+    {
+      "id": "greeting",
+      "question": "Hello! How can I help you?",
+      "intent": "User greets and asks for help",
+      "expectedElements": ["Greeting", "Request for assistance"],
+      "sampleResponse": "Hi, I need help with my account"
+    }
+  ]
+}
+```
+
+### **Test Output Files**
+
+- `vokal-results-[timestamp].json` - Detailed test results
+- `conversation-report-[timestamp].json` - Conversation logs with AI analysis
+
+---
+
+## 🔐 ENVIRONMENT CONFIGURATION
+
+### **Required Variables**
+
+```bash
+# Option 1: Service Account (Recommended)
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+
+# Option 2: API Key
+GOOGLE_AI_API_KEY=your_google_ai_api_key_here
+```
+
+### **Optional Variables**
+
+```bash
+NODE_ENV=development
+LOG_LEVEL=info          # error, warn, info, debug, verbose
+VOKAL_LOG_LEVEL=info    # Override for Vokal components
+```
+
+### **Required Google Cloud APIs**
+
+- Cloud Text-to-Speech API
+- Cloud Speech-to-Text API
+- Generative Language API (Gemini)
+
+---
+
+## 📖 KEY CONCEPTS
+
+### **Services**
+
+- **VoiceTestService**: TTS generation with Neurolink
+- **VoiceInteractionService**: Complete voice pipeline orchestration
+- **VoiceBotTestService**: Test suite execution with AI evaluation
+- **AIComparisonService**: Semantic response validation
+- **AudioMixerService**: Background audio mixing
+- **AudioRecordingService**: Microphone input capture
+
+### **Providers**
+
+- **STTHandlerManager**: Provider-agnostic STT management
+- **GoogleAISTTHandler**: Google Cloud Speech-to-Text implementation
+
+### **Background Sounds**
+
+- `office` - Office ambience (0.15 volume)
+- `cafe` - Coffee shop (0.20 volume)
+- `nature` - Outdoor sounds (0.18 volume)
+- `rain` - Gentle rainfall (0.12 volume)
+- `phone` - Phone static (0.08 volume)
+- `crowd` - Distant crowd (0.10 volume)
+
+---
+
+## 💻 DEVELOPMENT STANDARDS
+
+### **TypeScript Configuration**
+
+```typescript
+// ESM modules with NodeNext resolution
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true
+  }
+}
+```
+
+### **Code Quality Tools**
+
+- **ESLint**: Flat config with TypeScript plugin
+- **Prettier**: Single quotes, 2 spaces, semicolons
+- **Husky**: Pre-commit hooks for quality gates
+- **Commitlint**: Conventional commit messages
+- **Lint-staged**: Stage-specific linting
+
+### **Commit Message Format**
+
+```bash
+feat(stt): add support for multiple STT providers
+fix(audio): resolve memory leak in audio recording
+docs(readme): update installation instructions
+refactor(voice-test): simplify TTS generation logic
+```
+
+---
+
+## 🚀 RELEASE PROCESS
+
+### **Semantic Versioning**
+
+```bash
+# Version bump
+npm version patch      # Bug fixes (1.0.0 → 1.0.1)
+npm version minor      # New features (1.0.0 → 1.1.0)
+npm version major      # Breaking changes (1.0.0 → 2.0.0)
+
+# Automated release (via GitHub Actions)
+git push --tags
+```
+
+### **Release Pipeline**
+
+1. **Test**: Lint + Format + TypeCheck + Build
+2. **Version**: Semantic-release analyzes commits
+3. **Changelog**: Auto-generated from commits
+4. **Publish**: NPM package (@juspay/vokal)
+5. **GitHub Release**: Created with release notes
+
+---
+
+## ⚡ QUALITY METRICS
+
+### **Pre-Commit Checks**
+
+```bash
+npm run lint && npm run format:check && npm run typecheck && npm run build
+```
+
+### **Quality Standards**
+
+- **Type Safety**: Strict TypeScript mode
+- **Code Coverage**: Target >80% (when tests added)
+- **Build Success**: Zero compilation errors
+- **Lint Pass**: ESLint with recommended rules
+- **Format Consistency**: Prettier enforced
+
+---
+
+## 🎯 QUICK REFERENCE
+
+### **Most Common Commands**
+
+```bash
+# Development
+npm install && npm run build
+npm run dev
+
+# Generate speech
+vokal voice generate "Hello!" --voice en-US-Neural2-F --play
+
+# Run tests
+vokal test ./examples/sample-config.json
+
+# Quality check
+npm run validate:all
+```
+
+### **Key Files**
+
+- `src/cli/index.ts` - CLI entry point
+- `src/services/voice-test.ts` - TTS service
+- `src/services/voice-interaction.ts` - Voice pipeline
+- `examples/sample-config.json` - Test configuration example
+- `.env.example` - Environment variable template
+
+---
+
+**📦 Package**: @juspay/vokal v1.0.0  
+**📝 License**: MIT  
+**🔗 Repository**: https://github.com/juspay/vokal  
+**📧 Contact**: opensource@juspay.in

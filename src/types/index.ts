@@ -79,7 +79,11 @@ export type AudioMixingConfig = {
 
 export type AudioMixer = {
   /** Mix TTS audio with background sound */
-  mixAudio(speechPath: string, backgroundSound: string, backgroundVolume?: number): Promise<string>;
+  mixAudio(
+    speechPath: string,
+    backgroundSound: string,
+    backgroundVolume?: number
+  ): Promise<string>;
   /** Get available background sound presets */
   getAvailablePresets(): BackgroundSoundPreset[];
   /** Determine optimal mixing parameters based on text content */
@@ -102,7 +106,12 @@ export type Logger = {
 // ============================================================================
 
 // STT Types
-export type { STTInput, STTResponse, AudioQualityMetrics, STTConfig } from './stt.types.js';
+export type {
+  STTInput,
+  STTResponse,
+  AudioQualityMetrics,
+  STTConfig,
+} from './stt.types.js';
 
 // STT Provider Types (includes StreamingSTTConfig and StreamingSTTResult)
 export type {
@@ -116,10 +125,18 @@ export type {
 } from './stt-provider.types.js';
 
 // Audio Types
-export type { AudioConfig, AudioRecordingSession, AudioDevice, AudioData } from './audio.types.js';
+export type {
+  AudioConfig,
+  AudioRecordingSession,
+  AudioDevice,
+  AudioData,
+} from './audio.types.js';
 
 // Voice Interaction Types
-export type { VoiceInteractionConfig, VoiceInteractionResult } from './voice-interaction.types.js';
+export type {
+  VoiceInteractionConfig,
+  VoiceInteractionResult,
+} from './voice-interaction.types.js';
 
 // AI Comparison Types
 export type {
@@ -130,11 +147,15 @@ export type {
 } from './ai-comparison.types.js';
 
 // Voice Test Service Types
-export type { AudioFormat, TTSOptions, TTSResult, GoogleVoice } from './voice-test.types.js';
+export type {
+  AudioFormat,
+  TTSOptions,
+  TTSResult,
+  GoogleVoice,
+} from './voice-test.types.js';
 
 // CLI Types
 export type {
-  PackageJson,
   GenerateCommandArgs,
   VoicesCommandArgs,
   TestAudioCommandArgs,
@@ -152,7 +173,11 @@ export type { LogEntry, LoggerConfig } from './logger.types.js';
 export type { RetryOptions, CircuitBreakerOptions } from './retry.types.js';
 
 // Secure Exec Types
-export type { ExecOptions, ExecResult, AudioToolCheck } from './secure-exec.types.js';
+export type {
+  ExecOptions,
+  ExecResult,
+  AudioToolCheck,
+} from './secure-exec.types.js';
 
 // ============================================================================
 // Voice Bot Testing Types

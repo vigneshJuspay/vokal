@@ -136,7 +136,11 @@ export class VoiceTestError extends Error {
  * Configuration-related errors
  */
 export class ConfigurationError extends VoiceTestError {
-  constructor(message: string, originalError?: Error, context?: Record<string, unknown>) {
+  constructor(
+    message: string,
+    originalError?: Error,
+    context?: Record<string, unknown>
+  ) {
     super(message, ErrorCode.INVALID_CONFIG, originalError, context);
     this.name = 'ConfigurationError';
   }
@@ -242,7 +246,12 @@ export class ValidationError extends VoiceTestError {
   public readonly field?: string;
   public readonly value?: unknown;
 
-  constructor(message: string, field?: string, value?: unknown, originalError?: Error) {
+  constructor(
+    message: string,
+    field?: string,
+    value?: unknown,
+    originalError?: Error
+  ) {
     super(
       message,
       ErrorCode.VALIDATION_FAILED,
@@ -314,7 +323,9 @@ export function isVoiceTestError(error: unknown): error is VoiceTestError {
 /**
  * Type guard to check specific error types
  */
-export function isConfigurationError(error: unknown): error is ConfigurationError {
+export function isConfigurationError(
+  error: unknown
+): error is ConfigurationError {
   return error instanceof ConfigurationError;
 }
 
@@ -322,7 +333,9 @@ export function isFileSystemError(error: unknown): error is FileSystemError {
   return error instanceof FileSystemError;
 }
 
-export function isAudioProcessingError(error: unknown): error is AudioProcessingError {
+export function isAudioProcessingError(
+  error: unknown
+): error is AudioProcessingError {
   return error instanceof AudioProcessingError;
 }
 

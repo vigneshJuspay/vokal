@@ -137,17 +137,35 @@ export {
 export { safeJSONParse } from './types/index.js';
 
 // Logger
-export { LogLevel, ConsoleLogger, SilentLogger, createComponentLogger } from './utils/logger.js';
+export {
+  LogLevel,
+  ConsoleLogger,
+  SilentLogger,
+  createComponentLogger,
+} from './utils/logger.js';
 export type { LogEntry, LoggerConfig } from './types/index.js';
 
 // STT Optimization utilities
-export { getOptimalConfig, validateAudio, normalizeVolume } from './utils/stt-optimizer.js';
+export {
+  getOptimalConfig,
+  validateAudio,
+  normalizeVolume,
+} from './utils/stt-optimizer.js';
 
 // Retry utilities
-export { retry, withTimeout, CircuitBreaker, createResilientFunction } from './utils/retry.js';
+export {
+  retry,
+  withTimeout,
+  CircuitBreaker,
+  createResilientFunction,
+} from './utils/retry.js';
 
 // Secure execution utilities
-export { safeExec, commandExists, checkAudioTools } from './utils/secure-exec.js';
+export {
+  safeExec,
+  commandExists,
+  checkAudioTools,
+} from './utils/secure-exec.js';
 export type { ExecOptions, ExecResult, AudioToolCheck } from './types/index.js';
 
 /**

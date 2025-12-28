@@ -8,7 +8,10 @@
  * @since 2.0.0
  */
 
-import type { STTHandler, STTProviderName } from '../types/stt-provider.types.js';
+import type {
+  STTHandler,
+  STTProviderName,
+} from '../types/stt-provider.types.js';
 import { GoogleAISTTHandler } from './google-ai-stt.handler.js';
 import { VoiceTestError, ErrorCode } from '../errors/voice-test.errors.js';
 import { createComponentLogger } from '../utils/logger.js';
@@ -56,7 +59,10 @@ export class STTHandlerManager {
    * STTHandlerManager.registerHandler('custom-stt', (apiKey) => new CustomSTTHandler(apiKey));
    * ```
    */
-  static registerHandler(name: STTProviderName, factory: STTHandlerFactory): void {
+  static registerHandler(
+    name: STTProviderName,
+    factory: STTHandlerFactory
+  ): void {
     this.handlers.set(name, { factory });
     logger.info(`📝 Registered STT handler: ${name}`);
   }
@@ -80,12 +86,18 @@ export class STTHandlerManager {
    * });
    * ```
    */
-  static getHandler(provider: STTProviderName = this.defaultProvider, apiKey?: string): STTHandler {
+  static getHandler(
+    provider: STTProviderName = this.defaultProvider,
+    apiKey?: string
+  ): STTHandler {
     const entry = this.handlers.get(provider);
 
     if (!entry) {
       // Try fallback to default provider
-      if (provider !== this.defaultProvider && this.handlers.has(this.defaultProvider)) {
+      if (
+        provider !== this.defaultProvider &&
+        this.handlers.has(this.defaultProvider)
+      ) {
         logger.warn(
           `⚠️ Provider '${provider}' not found, falling back to '${this.defaultProvider}'`
         );

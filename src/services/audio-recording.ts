@@ -43,7 +43,11 @@ import {
 } from '../errors/voice-test.errors.js';
 import recorder from 'node-record-lpcm16';
 import type { Recording } from 'node-record-lpcm16';
-import type { AudioConfig, AudioRecordingSession, AudioDevice } from '../types/index.js';
+import type {
+  AudioConfig,
+  AudioRecordingSession,
+  AudioDevice,
+} from '../types/index.js';
 import { accessSync, constants } from 'fs';
 import { platform } from 'os';
 
@@ -137,7 +141,8 @@ export class AudioRecordingService {
     return Promise.resolve({
       supported: true,
       missingTools: [],
-      recommendations: 'Audio recording ready (using system audio tools: sox/rec/arecord)',
+      recommendations:
+        'Audio recording ready (using system audio tools: sox/rec/arecord)',
     });
   }
 
@@ -184,7 +189,9 @@ export class AudioRecordingService {
    * }, 10000);
    * ```
    */
-  startRecording(config: Partial<AudioConfig> = {}): Promise<AudioRecordingSession> {
+  startRecording(
+    config: Partial<AudioConfig> = {}
+  ): Promise<AudioRecordingSession> {
     const audioConfig: AudioConfig = {
       sampleRate: 16000, // Optimal for STT
       channels: 1, // Mono for speech

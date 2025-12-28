@@ -113,7 +113,9 @@ export interface TTSProvider {
 /**
  * TTS Provider factory function type
  */
-export type TTSProviderFactory = (config: Record<string, unknown>) => TTSProvider;
+export type TTSProviderFactory = (
+  config: Record<string, unknown>
+) => TTSProvider;
 
 /**
  * TTS Provider registry entry

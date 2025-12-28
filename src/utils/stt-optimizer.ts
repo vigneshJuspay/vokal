@@ -93,7 +93,9 @@ export function getOptimalConfig(
     encoding: 'LINEAR16',
     sampleRate: configs[ttsProvider].sampleRate,
     model: 'latest_short', // Best for clear, synthesized speech
-    speechContexts: expectedPhrases ? [{ phrases: expectedPhrases }] : undefined,
+    speechContexts: expectedPhrases
+      ? [{ phrases: expectedPhrases }]
+      : undefined,
     enableAutomaticPunctuation: true,
     maxAlternatives: 5, // Get top 5 to choose highest confidence
   };
@@ -345,9 +347,17 @@ export function analyzeConfidence(confidence: number): {
   recommendation: string;
 } {
   if (confidence >= 0.95) {
-    return { isReliable: true, level: 'excellent', recommendation: 'Perfect transcription' };
+    return {
+      isReliable: true,
+      level: 'excellent',
+      recommendation: 'Perfect transcription',
+    };
   } else if (confidence >= 0.9) {
-    return { isReliable: true, level: 'good', recommendation: 'Meets reliability target' };
+    return {
+      isReliable: true,
+      level: 'good',
+      recommendation: 'Meets reliability target',
+    };
   } else if (confidence >= 0.75) {
     return {
       isReliable: false,

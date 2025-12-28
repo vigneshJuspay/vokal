@@ -1,0 +1,120 @@
+# Repository settings for vokal
+# This file is used by the Settings GitHub App to manage repository configuration
+
+repository:
+  # Repository basic settings
+  name: vokal
+  description: Production voice bot framework with TTS, STT, and AI evaluation using Neurolink
+  homepage: https://vokal.github.io/
+  topics: 
+    - javascript
+    - nodejs
+    - {{repoType}}
+  
+  # Repository features
+  private: false
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  has_pages: true
+  has_downloads: true
+  default_branch: main
+  
+  # Repository settings
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
+  allow_auto_merge: true
+  delete_branch_on_merge: true
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
+
+# Labels configuration
+labels:
+  - name: bug
+    color: d73a4a
+    description: Something isn't working
+    
+  - name: documentation
+    color: 0075ca
+    description: Improvements or additions to documentation
+    
+  - name: duplicate
+    color: cfd3d7
+    description: This issue or pull request already exists
+    
+  - name: enhancement
+    color: a2eeef
+    description: New feature or request
+    
+  - name: good first issue
+    color: 7057ff
+    description: Good for newcomers
+    
+  - name: help wanted
+    color: 008672
+    description: Extra attention is needed
+    
+  - name: invalid
+    color: e4e669
+    description: This doesn't seem right
+    
+  - name: question
+    color: d876e3
+    description: Further information is requested
+    
+  - name: wontfix
+    color: ffffff
+    description: This will not be worked on
+    
+  - name: dependencies
+    color: 0366d6
+    description: Pull requests that update a dependency file
+    
+  - name: security
+    color: ee0701
+    description: Security related issues
+    
+  - name: performance
+    color: fbca04
+    description: Performance related improvements
+
+# Branch protection rules
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - "CI / test"
+          - "CI / lint"
+          - "CI / build"
+      enforce_admins: true
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+        dismissal_restrictions: {}
+      restrictions: null
+      required_linear_history: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+# Teams configuration (optional)
+teams:
+  - name: "vokal-maintainers"
+    permission: admin
+  - name: "vokal-contributors"
+    permission: write
+
+# Collaborators (optional)
+collaborators: []
+
+# Milestones
+milestones:
+  - title: v1.0.0
+    description: First stable release
+    state: open
+  - title: v1.1.0
+    description: Minor feature updates
+    state: open

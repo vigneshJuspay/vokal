@@ -171,7 +171,10 @@ export class AudioMixerService implements AudioMixer {
     try {
       // Check if speech file exists
       if (!(await this.fileExists(speechPath))) {
-        throw new VoiceTestError(`Speech file not found: ${speechPath}`, ErrorCode.FILE_NOT_FOUND);
+        throw new VoiceTestError(
+          `Speech file not found: ${speechPath}`,
+          ErrorCode.FILE_NOT_FOUND
+        );
       }
 
       // Try to resolve background sound path
@@ -188,14 +191,22 @@ export class AudioMixerService implements AudioMixer {
       }
 
       // Get optimal mixing configuration
-      const mixConfig = this.getOptimalMixingConfig('', backgroundSound, backgroundVolume);
+      const mixConfig = this.getOptimalMixingConfig(
+        '',
+        backgroundSound,
+        backgroundVolume
+      );
 
       // Load both audio files as PCM data
       const speechData = await this.loadWavFile(speechPath);
       const backgroundData = await this.loadWavFile(backgroundPath);
 
       // Mix the audio samples
-      const mixedData = this.mixAudioSamples(speechData, backgroundData, mixConfig);
+      const mixedData = this.mixAudioSamples(
+        speechData,
+        backgroundData,
+        mixConfig
+      );
 
       // Save the mixed result back to the original file location (override)
       await this.saveWavFile(speechPath, mixedData, speechData.sampleRate);
@@ -290,7 +301,9 @@ export class AudioMixerService implements AudioMixer {
    * @private
    * @internal
    */
-  private async resolveBackgroundPath(backgroundSound: string): Promise<string> {
+  private async resolveBackgroundPath(
+    backgroundSound: string
+  ): Promise<string> {
     const preset = this.presets.find((p) => p.name === backgroundSound);
     if (preset) {
       return preset.filePath;
@@ -443,7 +456,9 @@ export class AudioMixerService implements AudioMixer {
       await fs.mkdir(this.assetsPath, { recursive: true });
       console.info(`📁 Assets directory created: ${this.assetsPath}`);
     } catch (error) {
-      console.warn(`⚠️ Could not create assets directory: ${getErrorMessage(error)}`);
+      console.warn(
+        `⚠️ Could not create assets directory: ${getErrorMessage(error)}`
+      );
     }
   }
 
@@ -466,10 +481,17 @@ export class AudioMixerService implements AudioMixer {
   private async loadWavFile(filePath: string): Promise<AudioData> {
     const buffer = await fs.readFile(filePath);
 
-    const dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    const dataView = new DataView(
+      buffer.buffer,
+      buffer.byteOffset,
+      buffer.byteLength
+    );
 
     if (buffer.toString('ascii', 0, 4) !== 'RIFF') {
-      throw new VoiceTestError(`Invalid WAV file: ${filePath}`, ErrorCode.INVALID_AUDIO_FORMAT);
+      throw new VoiceTestError(
+        `Invalid WAV file: ${filePath}`,
+        ErrorCode.INVALID_AUDIO_FORMAT
+      );
     }
 
     let offset = 12;
@@ -492,7 +514,11 @@ export class AudioMixerService implements AudioMixer {
 
         let dataOffset = offset + 8 + chunkSize;
         while (dataOffset < buffer.length - 8) {
-          const dataChunkId = buffer.toString('ascii', dataOffset, dataOffset + 4);
+          const dataChunkId = buffer.toString(
+            'ascii',
+            dataOffset,
+            dataOffset + 4
+          );
           const dataChunkSize = dataView.getUint32(dataOffset + 4, true);
 
           if (dataChunkId === 'data') {
@@ -509,8 +535,14 @@ export class AudioMixerService implements AudioMixer {
             } else if (numChannels === 2) {
               for (let i = 0; i < dataChunkSize; i += 4) {
                 if (audioDataStart + i + 3 < buffer.length) {
-                  const leftSample = dataView.getInt16(audioDataStart + i, true);
-                  const rightSample = dataView.getInt16(audioDataStart + i + 2, true);
+                  const leftSample = dataView.getInt16(
+                    audioDataStart + i,
+                    true
+                  );
+                  const rightSample = dataView.getInt16(
+                    audioDataStart + i + 2,
+                    true
+                  );
                   const monoSample = Math.round((leftSample + rightSample) / 2);
                   samples.push(monoSample);
                 }
@@ -569,11 +601,17 @@ export class AudioMixerService implements AudioMixer {
     config: AudioMixingConfig
   ): AudioData {
     if (!speechData.samples || speechData.samples.length === 0) {
-      throw new VoiceTestError('Speech audio has no samples', ErrorCode.INVALID_AUDIO_DATA);
+      throw new VoiceTestError(
+        'Speech audio has no samples',
+        ErrorCode.INVALID_AUDIO_DATA
+      );
     }
 
     if (!backgroundData.samples || backgroundData.samples.length === 0) {
-      throw new VoiceTestError('Background audio has no samples', ErrorCode.INVALID_AUDIO_DATA);
+      throw new VoiceTestError(
+        'Background audio has no samples',
+        ErrorCode.INVALID_AUDIO_DATA
+      );
     }
 
     const speechSamples = speechData.samples;
@@ -597,7 +635,8 @@ export class AudioMixerService implements AudioMixer {
 
     for (let i = 0; i < speechSamples.length; i++) {
       const speechSample = speechSamples[i];
-      const backgroundSample = (backgroundSamples[i] || 0) * config.backgroundVolume;
+      const backgroundSample =
+        (backgroundSamples[i] || 0) * config.backgroundVolume;
 
       let mixed = speechSample + backgroundSample;
 
@@ -629,7 +668,11 @@ export class AudioMixerService implements AudioMixer {
    * @private
    * @internal
    */
-  private resampleAudio(samples: number[], fromRate: number, toRate: number): number[] {
+  private resampleAudio(
+    samples: number[],
+    fromRate: number,
+    toRate: number
+  ): number[] {
     if (fromRate === toRate) {
       return samples;
     }

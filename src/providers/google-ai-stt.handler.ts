@@ -61,7 +61,10 @@ interface StreamData {
 function mapEncodingToGoogleType(
   encoding: string
 ): google.cloud.speech.v1.RecognitionConfig.AudioEncoding {
-  const encodingMap: Record<string, google.cloud.speech.v1.RecognitionConfig.AudioEncoding> = {
+  const encodingMap: Record<
+    string,
+    google.cloud.speech.v1.RecognitionConfig.AudioEncoding
+  > = {
     LINEAR16: 1, // LINEAR16
     FLAC: 2, // FLAC
     MULAW: 3, // MULAW
@@ -166,7 +169,8 @@ export class GoogleAISTTHandler implements STTHandler {
           sampleRateHertz: request.sampleRate,
           languageCode: request.languageCode,
           model: request.model || 'latest_short',
-          enableAutomaticPunctuation: request.enableAutomaticPunctuation ?? true,
+          enableAutomaticPunctuation:
+            request.enableAutomaticPunctuation ?? true,
           maxAlternatives: request.maxAlternatives || 1,
           speechContexts: request.speechContexts?.map((ctx) => ({
             phrases: ctx.phrases,
@@ -210,9 +214,13 @@ export class GoogleAISTTHandler implements STTHandler {
 
       // Extract word timing information
       const words = alternative.words?.map((word) => {
-        const startSeconds = word.startTime?.seconds ? Number(word.startTime.seconds) : 0;
+        const startSeconds = word.startTime?.seconds
+          ? Number(word.startTime.seconds)
+          : 0;
         const startNanos = word.startTime?.nanos || 0;
-        const endSeconds = word.endTime?.seconds ? Number(word.endTime.seconds) : 0;
+        const endSeconds = word.endTime?.seconds
+          ? Number(word.endTime.seconds)
+          : 0;
         const endNanos = word.endTime?.nanos || 0;
 
         return {
@@ -257,7 +265,10 @@ export class GoogleAISTTHandler implements STTHandler {
     onError?: (error: Error) => void
   ): StreamingSession {
     if (!this.isConfigured()) {
-      throw new VoiceTestError('Google AI STT is not configured', ErrorCode.STT_NOT_CONFIGURED);
+      throw new VoiceTestError(
+        'Google AI STT is not configured',
+        ErrorCode.STT_NOT_CONFIGURED
+      );
     }
 
     if (!this.client) {
@@ -274,11 +285,17 @@ export class GoogleAISTTHandler implements STTHandler {
     let totalAudioBytes = 0;
 
     // Hybrid VAD timeouts
-    const initialWaitTimeout = config.speechStartTimeout ? config.speechStartTimeout * 1000 : 45000; // 45s default
-    const silenceDuration = config.speechEndTimeout ? config.speechEndTimeout * 1000 : 2000; // 2s default
+    const initialWaitTimeout = config.speechStartTimeout
+      ? config.speechStartTimeout * 1000
+      : 45000; // 45s default
+    const silenceDuration = config.speechEndTimeout
+      ? config.speechEndTimeout * 1000
+      : 2000; // 2s default
 
     logger.info('🚀 Starting streaming speech recognition with Hybrid VAD...');
-    logger.info(`📊 Config: ${config.languageCode}, ${config.sampleRate}Hz, ${config.encoding}`);
+    logger.info(
+      `📊 Config: ${config.languageCode}, ${config.sampleRate}Hz, ${config.encoding}`
+    );
     logger.info(
       `🔧 Hybrid VAD enabled: Google detects speech, we control ${initialWaitTimeout / 1000}s/${silenceDuration / 1000}s timeouts`
     );
@@ -302,7 +319,9 @@ export class GoogleAISTTHandler implements STTHandler {
     });
 
     // Start initial wait timer
-    logger.info(`⏱️ Initial wait timer started: ${initialWaitTimeout / 1000}s to start speaking`);
+    logger.info(
+      `⏱️ Initial wait timer started: ${initialWaitTimeout / 1000}s to start speaking`
+    );
     initialWaitTimer = setTimeout(() => {
       if (!firstMeaningfulTranscript && isActive) {
         logger.warn('⏰ Initial wait timeout - no speech detected');
@@ -324,10 +343,14 @@ export class GoogleAISTTHandler implements STTHandler {
       if (streamData.speechEventType) {
         logger.info(`🎯 Speech Event: ${streamData.speechEventType}`);
 
-        if (streamData.speechEventType === 'SPEECH_EVENT_SPEECH_ACTIVITY_BEGIN') {
+        if (
+          streamData.speechEventType === 'SPEECH_EVENT_SPEECH_ACTIVITY_BEGIN'
+        ) {
           if (!audioActivityDetected) {
             audioActivityDetected = true;
-            logger.info('🗣️ Audio activity detected (waiting for transcripts...)');
+            logger.info(
+              '🗣️ Audio activity detected (waiting for transcripts...)'
+            );
           }
           if (!speechStarted) {
             speechStarted = true;
@@ -341,7 +364,9 @@ export class GoogleAISTTHandler implements STTHandler {
             clearTimeout(speechEndTimer);
             speechEndTimer = null;
           }
-        } else if (streamData.speechEventType === 'SPEECH_EVENT_SPEECH_ACTIVITY_END') {
+        } else if (
+          streamData.speechEventType === 'SPEECH_EVENT_SPEECH_ACTIVITY_END'
+        ) {
           logger.info('🛑 User stopped speaking. Starting 2s silence timer...');
           logger.info(
             `🔍 Current state: speechStarted=${speechStarted}, speechEndTimer=${speechEndTimer ? 'active' : 'null'}`
@@ -353,7 +378,9 @@ export class GoogleAISTTHandler implements STTHandler {
           }
           // Start speech end timer
           speechEndTimer = setTimeout(() => {
-            logger.info('⏳ 2s of silence passed. Calling onSpeechEnd callback...');
+            logger.info(
+              '⏳ 2s of silence passed. Calling onSpeechEnd callback...'
+            );
             if (onSpeechEnd) {
               logger.info('📞 Calling onSpeechEnd callback now!');
               onSpeechEnd();
@@ -364,7 +391,9 @@ export class GoogleAISTTHandler implements STTHandler {
           logger.info(`⏱️ Silence timer set for ${silenceDuration}ms`);
         } else if (streamData.speechEventType === 'END_OF_SINGLE_UTTERANCE') {
           // Google detected end of utterance - user stopped speaking
-          logger.info('🛑 END_OF_SINGLE_UTTERANCE detected. Starting 2s silence timer...');
+          logger.info(
+            '🛑 END_OF_SINGLE_UTTERANCE detected. Starting 2s silence timer...'
+          );
           logger.info(
             `🔍 Current state: speechStarted=${speechStarted}, speechEndTimer=${speechEndTimer ? 'active' : 'null'}`
           );
@@ -375,7 +404,9 @@ export class GoogleAISTTHandler implements STTHandler {
           }
           // Start speech end timer - keep listening during this time
           speechEndTimer = setTimeout(() => {
-            logger.info('⏳ 2s of silence passed. Calling onSpeechEnd callback...');
+            logger.info(
+              '⏳ 2s of silence passed. Calling onSpeechEnd callback...'
+            );
             if (onSpeechEnd) {
               logger.info('📞 Calling onSpeechEnd callback now!');
               onSpeechEnd();
@@ -394,7 +425,11 @@ export class GoogleAISTTHandler implements STTHandler {
         const result = streamData.results[0];
         const alternative = result.alternatives?.[0];
 
-        if (alternative && alternative.transcript && alternative.transcript.trim().length > 0) {
+        if (
+          alternative &&
+          alternative.transcript &&
+          alternative.transcript.trim().length > 0
+        ) {
           // Cancel initial wait timer on first meaningful transcript
           if (!firstMeaningfulTranscript && initialWaitTimer) {
             firstMeaningfulTranscript = true;

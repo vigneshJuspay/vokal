@@ -44,7 +44,10 @@
  */
 
 import { STTHandlerManager } from '../providers/stt-handler-manager.js';
-import type { STTHandler, STTProviderName } from '../types/stt-provider.types.js';
+import type {
+  STTHandler,
+  STTProviderName,
+} from '../types/stt-provider.types.js';
 import { AudioRecordingService } from './audio-recording.js';
 import { VoiceTestService } from './voice-test.js';
 import { ConsoleLogger } from '../utils/logger.js';
@@ -113,7 +116,10 @@ export class VoiceInteractionService {
     this.config = config;
 
     if (config) {
-      this.logger.info('🔧 VoiceInteractionService initialized with config:', config);
+      this.logger.info(
+        '🔧 VoiceInteractionService initialized with config:',
+        config
+      );
     }
 
     // Use STT Handler Manager to get the appropriate STT provider
@@ -183,7 +189,9 @@ export class VoiceInteractionService {
     try {
       const audioSupport = await this.audioService.checkAudioSupport();
       if (!audioSupport.supported) {
-        errors.push(`Audio not supported: ${audioSupport.missingTools.join(', ')}`);
+        errors.push(
+          `Audio not supported: ${audioSupport.missingTools.join(', ')}`
+        );
         errors.push(`Recommendation: ${audioSupport.recommendations}`);
       } else {
         audio = true; // naudiodon is ready
@@ -202,7 +210,9 @@ export class VoiceInteractionService {
     }
 
     const allGood = tts && audio && stt;
-    this.logger.info(`🔍 System validation: TTS=${tts}, Audio=${audio}, STT=${stt}`);
+    this.logger.info(
+      `🔍 System validation: TTS=${tts}, Audio=${audio}, STT=${stt}`
+    );
 
     if (allGood) {
       this.logger.info('✅ All system components validated successfully');
@@ -223,7 +233,10 @@ export class VoiceInteractionService {
    * @private
    * @internal
    */
-  private validateConfig(fullConfig: Required<VoiceInteractionOptions>, question: string): void {
+  private validateConfig(
+    fullConfig: Required<VoiceInteractionOptions>,
+    question: string
+  ): void {
     // Validate question text
     if (!question || question.trim().length === 0) {
       throw new VoiceTestError(
@@ -345,7 +358,8 @@ export class VoiceInteractionService {
       voice: config.voice ?? config.voiceName ?? 'en-US-Neural2-F',
       voiceName: config.voiceName ?? config.voice ?? 'en-US-Neural2-F',
       recordingDuration: config.recordingDuration ?? 10000,
-      maxRecordingDuration: config.maxRecordingDuration ?? config.recordingDuration ?? 10000,
+      maxRecordingDuration:
+        config.maxRecordingDuration ?? config.recordingDuration ?? 10000,
       sampleRate: config.sampleRate ?? 16000,
       silenceTimeout: config.silenceTimeout ?? 2000,
       confidenceThreshold: config.confidenceThreshold ?? 0.3,
@@ -428,7 +442,9 @@ export class VoiceInteractionService {
    * - Monitors volume levels
    * - Handles timeouts and errors
    */
-  private async listenAndTranscribe(config: Required<VoiceInteractionOptions>): Promise<{
+  private async listenAndTranscribe(
+    config: Required<VoiceInteractionOptions>
+  ): Promise<{
     transcript: string;
     confidence: number;
     audioProcessed: number;
@@ -532,7 +548,9 @@ export class VoiceInteractionService {
           };
 
           const onSpeechEnd = (): void => {
-            this.logger.info('🤫 Speech ended (after 2s silence detected by Google)');
+            this.logger.info(
+              '🤫 Speech ended (after 2s silence detected by Google)'
+            );
 
             // Google already waited 2 seconds and kept listening
             // Now immediately stop recording and close stream
@@ -691,10 +709,14 @@ export class VoiceInteractionService {
         }
       );
 
-      this.logger.info(`✅ Voice pipeline test successful: "${result.transcript}"`);
+      this.logger.info(
+        `✅ Voice pipeline test successful: "${result.transcript}"`
+      );
       return true;
     } catch (error) {
-      this.logger.error(`❌ Voice pipeline test failed: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `❌ Voice pipeline test failed: ${getErrorMessage(error)}`
+      );
       return false;
     }
   }

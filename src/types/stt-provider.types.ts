@@ -20,7 +20,14 @@ export interface STTRequest {
   /** Audio data as Buffer */
   audio: Buffer;
   /** Audio encoding format */
-  encoding: 'LINEAR16' | 'FLAC' | 'MULAW' | 'AMR' | 'AMR_WB' | 'OGG_OPUS' | 'WEBM_OPUS';
+  encoding:
+    | 'LINEAR16'
+    | 'FLAC'
+    | 'MULAW'
+    | 'AMR'
+    | 'AMR_WB'
+    | 'OGG_OPUS'
+    | 'WEBM_OPUS';
   /** Audio sample rate in Hz */
   sampleRate: number;
   /** Language code (e.g., 'en-US', 'es-ES') */

@@ -14,7 +14,10 @@ export async function playAudio(filePath: string): Promise<void> {
   const resolvedPath = resolve(filePath);
 
   if (!existsSync(resolvedPath)) {
-    throw new VoiceTestError(`Audio file not found: ${filePath}`, ErrorCode.FILE_NOT_FOUND);
+    throw new VoiceTestError(
+      `Audio file not found: ${filePath}`,
+      ErrorCode.FILE_NOT_FOUND
+    );
   }
 
   let command: string;

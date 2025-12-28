@@ -1,0 +1,8 @@
+# Global owners
+* @juspay/vokal-maintainers
+
+# Documentation
+*.md @juspay/docs-team
+
+# GitHub workflows
+/.github/ @juspay/devops-team

@@ -172,7 +172,11 @@ export class ConsoleLogger implements Logger {
    * - Colors applied based on log level
    * - Context included if set
    */
-  private formatMessage(level: LogLevel, message: string, ...args: unknown[]): string {
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    ...args: unknown[]
+  ): string {
     const timestamp = new Date().toISOString();
     const levelStr = this.getLevelName(level);
     const contextStr = this.context ? `[${this.context}]` : '';

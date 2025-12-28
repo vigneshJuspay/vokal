@@ -4,13 +4,6 @@
  */
 
 /**
- * Package JSON structure
- */
-export type PackageJson = {
-  version: string;
-};
-
-/**
  * Generate Command Arguments
  */
 export type GenerateCommandArgs = {

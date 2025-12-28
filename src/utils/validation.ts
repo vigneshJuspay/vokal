@@ -66,10 +66,17 @@ import { ValidationError } from '../errors/voice-test.errors.js';
  */
 export function validateSpeakingRate(rate: number): void {
   if (typeof rate !== 'number' || isNaN(rate)) {
-    throw new ValidationError('Speaking rate must be a valid number', 'speakingRate', rate);
+    throw new ValidationError(
+      'Speaking rate must be a valid number',
+      'speakingRate',
+      rate
+    );
   }
 
-  if (rate < AUDIO_LIMITS.SPEAKING_RATE.MIN || rate > AUDIO_LIMITS.SPEAKING_RATE.MAX) {
+  if (
+    rate < AUDIO_LIMITS.SPEAKING_RATE.MIN ||
+    rate > AUDIO_LIMITS.SPEAKING_RATE.MAX
+  ) {
     throw new ValidationError(
       `Speaking rate must be between ${AUDIO_LIMITS.SPEAKING_RATE.MIN} and ${AUDIO_LIMITS.SPEAKING_RATE.MAX}`,
       'speakingRate',
@@ -138,9 +145,16 @@ export function validatePitch(pitch: number): void {
  * // Error message will reference 'backgroundVolume'
  * ```
  */
-export function validateVolume(volume: number, fieldName: string = 'volume'): void {
+export function validateVolume(
+  volume: number,
+  fieldName: string = 'volume'
+): void {
   if (typeof volume !== 'number' || isNaN(volume)) {
-    throw new ValidationError(`${fieldName} must be a valid number`, fieldName, volume);
+    throw new ValidationError(
+      `${fieldName} must be a valid number`,
+      fieldName,
+      volume
+    );
   }
 
   if (volume < AUDIO_LIMITS.VOLUME.MIN || volume > AUDIO_LIMITS.VOLUME.MAX) {
@@ -192,7 +206,11 @@ export function validateText(text: string, maxLength: number = 5000): void {
   }
 
   if (text.length > maxLength) {
-    throw new ValidationError(`Text length cannot exceed ${maxLength} characters`, 'text', text);
+    throw new ValidationError(
+      `Text length cannot exceed ${maxLength} characters`,
+      'text',
+      text
+    );
   }
 }
 
@@ -224,7 +242,11 @@ export function validateText(text: string, maxLength: number = 5000): void {
  */
 export function validateLanguageCode(languageCode: string): void {
   if (typeof languageCode !== 'string') {
-    throw new ValidationError('Language code must be a string', 'languageCode', languageCode);
+    throw new ValidationError(
+      'Language code must be a string',
+      'languageCode',
+      languageCode
+    );
   }
 
   // Language code format: xx-XX (e.g., en-US, es-ES)
@@ -258,11 +280,19 @@ export function validateLanguageCode(languageCode: string): void {
  */
 export function validateVoiceName(voiceName: string): void {
   if (typeof voiceName !== 'string') {
-    throw new ValidationError('Voice name must be a string', 'voiceName', voiceName);
+    throw new ValidationError(
+      'Voice name must be a string',
+      'voiceName',
+      voiceName
+    );
   }
 
   if (voiceName.trim().length === 0) {
-    throw new ValidationError('Voice name cannot be empty', 'voiceName', voiceName);
+    throw new ValidationError(
+      'Voice name cannot be empty',
+      'voiceName',
+      voiceName
+    );
   }
 }
 
@@ -366,7 +396,11 @@ export function validateSTTEncoding(encoding: string): void {
  */
 export function validateSampleRate(sampleRate: number): void {
   if (typeof sampleRate !== 'number' || isNaN(sampleRate)) {
-    throw new ValidationError('Sample rate must be a valid number', 'sampleRate', sampleRate);
+    throw new ValidationError(
+      'Sample rate must be a valid number',
+      'sampleRate',
+      sampleRate
+    );
   }
 
   const validSampleRates = [8000, 16000, 24000, 32000, 44100, 48000];
@@ -404,11 +438,19 @@ export function validateSampleRate(sampleRate: number): void {
  */
 export function validateFilePath(filePath: string): void {
   if (typeof filePath !== 'string') {
-    throw new ValidationError('File path must be a string', 'filePath', filePath);
+    throw new ValidationError(
+      'File path must be a string',
+      'filePath',
+      filePath
+    );
   }
 
   if (filePath.trim().length === 0) {
-    throw new ValidationError('File path cannot be empty', 'filePath', filePath);
+    throw new ValidationError(
+      'File path cannot be empty',
+      'filePath',
+      filePath
+    );
   }
 
   // Check for path traversal attacks
@@ -444,7 +486,11 @@ export function validateFilePath(filePath: string): void {
  */
 export function validateAPIKey(apiKey: string): void {
   if (typeof apiKey !== 'string') {
-    throw new ValidationError('API key must be a string', 'apiKey', typeof apiKey);
+    throw new ValidationError(
+      'API key must be a string',
+      'apiKey',
+      typeof apiKey
+    );
   }
 
   if (apiKey.trim().length === 0) {

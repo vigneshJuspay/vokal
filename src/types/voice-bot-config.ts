@@ -325,7 +325,8 @@ export const SAMPLE_TEST_CONFIG: VoiceBotConfig = {
     {
       id: 'greeting',
       question: 'Hello! How can I help you today?',
-      intent: 'User should respond with a greeting and indicate they need help or have a question',
+      intent:
+        'User should respond with a greeting and indicate they need help or have a question',
       expectedElements: [
         'Polite greeting (hello, hi, good morning, etc.)',
         'Indication of needing help or having a question',
@@ -347,7 +348,8 @@ export const SAMPLE_TEST_CONFIG: VoiceBotConfig = {
         'Numeric or alphanumeric identifier',
         'Clear indication this is their account reference',
       ],
-      context: 'Account identification - user should provide specific account details',
+      context:
+        'Account identification - user should provide specific account details',
       sampleResponse: 'My account number is 12345',
       weight: 10,
       required: true,
@@ -356,13 +358,15 @@ export const SAMPLE_TEST_CONFIG: VoiceBotConfig = {
     {
       id: 'problem-description',
       question: 'What seems to be the issue with your account?',
-      intent: "User should describe a specific problem or issue they're experiencing",
+      intent:
+        "User should describe a specific problem or issue they're experiencing",
       expectedElements: [
         'Clear description of a problem or issue',
         'Relates to account access, functionality, or services',
         'Specific enough to understand the nature of the problem',
       ],
-      context: 'Problem identification - user should articulate their specific issue clearly',
+      context:
+        'Problem identification - user should articulate their specific issue clearly',
       sampleResponse: "I can't log into my account",
       weight: 9,
       required: true,

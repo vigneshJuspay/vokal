@@ -43,7 +43,10 @@
  * ```
  */
 
-import type { RetryOptions, CircuitBreakerOptions } from '../types/retry.types.js';
+import type {
+  RetryOptions,
+  CircuitBreakerOptions,
+} from '../types/retry.types.js';
 
 /**
  * Default retry predicate - always retry.
@@ -64,7 +67,11 @@ const defaultIsRetryable = (_error: Error): boolean => true;
  *
  * @internal
  */
-const defaultOnRetry = (_error: Error, _attempt: number, _delay: number): void => {
+const defaultOnRetry = (
+  _error: Error,
+  _attempt: number,
+  _delay: number
+): void => {
   // No-op by default
 };
 
@@ -200,7 +207,9 @@ export async function withTimeout<T>(
 ): Promise<T> {
   return Promise.race([
     promise,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(errorMessage)), timeoutMs)),
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
+    ),
   ]);
 }
 
@@ -358,7 +367,8 @@ export class CircuitBreaker<T> {
     this.timeout = options.timeout ?? 10000;
     this.resetTimeout = options.resetTimeout ?? 60000;
     this.onStateChange = options.onStateChange ?? defaultOnStateChange;
-    this.shouldCountFailure = options.shouldCountFailure ?? defaultShouldCountFailure;
+    this.shouldCountFailure =
+      options.shouldCountFailure ?? defaultShouldCountFailure;
   }
 
   /**
@@ -440,7 +450,10 @@ export class CircuitBreaker<T> {
       if (this.state === CircuitState.HALF_OPEN) {
         this.changeState(CircuitState.OPEN);
         this.successCount = 0;
-      } else if (this.state === CircuitState.CLOSED && this.failureCount >= this.failureThreshold) {
+      } else if (
+        this.state === CircuitState.CLOSED &&
+        this.failureCount >= this.failureThreshold
+      ) {
         this.changeState(CircuitState.OPEN);
       }
     }

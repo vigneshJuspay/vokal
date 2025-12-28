@@ -1,17 +1,17 @@
 {
-  "name": "vokal",
+  "name": "@juspay/vokal",
   "version": "1.0.0",
   "description": "Production voice bot framework with TTS, STT, and AI evaluation using Neurolink",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "vokal": "dist/src/cli/index.js"
+    "vokal": "dist/cli/index.js"
   },
   "scripts": {
     "dev": "tsc --watch",
     "build": "npm run clean && tsc",
-    "start": "node dist/src/index.js",
-    "cli": "node dist/src/cli/index.js",
+    "start": "node dist/index.js",
+    "cli": "node dist/cli/index.js",
     "clean": "rm -rf dist",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
@@ -20,7 +20,18 @@
     "typecheck": "tsc --noEmit",
     "prebuild": "npm run format && npm run lint",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:watch": "tsc --watch",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "docs:build": "mkdocs build --strict --clean",
+    "docs:serve": "mkdocs serve",
+    "docs:gh-deploy": "mkdocs gh-deploy --force",
+    "validate": "npm run lint && npm run format:check",
+    "validate:all": "npm run validate && npm run test",
+    "prepare": "husky install",
+    "pre-push": "npm run validate:all",
+    "release": "semantic-release"
   },
   "keywords": [
     "voice-bot",
@@ -51,7 +62,21 @@
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
     "prettier": "^3.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "semantic-release": "^22.0.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^11.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.0.0",
+    "@semantic-release/npm": "^11.0.0",
+    "@semantic-release/release-notes-generator": "^12.0.0",
+    "@eslint/js": "^9.0.0",
+    "globals": "^15.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "tsx": "^4.0.0",
+    "@commitlint/cli": "^17.0.0",
+    "@commitlint/config-conventional": "^17.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -68,24 +93,66 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./errors": {
-      "import": "./dist/src/errors/voice-test.errors.js",
-      "types": "./dist/src/errors/voice-test.errors.d.ts"
+      "import": "./dist/errors/voice-test.errors.js",
+      "types": "./dist/errors/voice-test.errors.d.ts"
     },
     "./constants": {
-      "import": "./dist/src/constants/audio.constants.js",
-      "types": "./dist/src/constants/audio.constants.d.ts"
+      "import": "./dist/constants/audio.constants.js",
+      "types": "./dist/constants/audio.constants.d.ts"
     },
     "./utils": {
-      "import": "./dist/src/utils/validation.js",
-      "types": "./dist/src/utils/validation.d.ts"
+      "import": "./dist/utils/validation.js",
+      "types": "./dist/utils/validation.d.ts"
     },
     "./logger": {
-      "import": "./dist/src/utils/logger.js",
-      "types": "./dist/src/utils/logger.d.ts"
+      "import": "./dist/utils/logger.js",
+      "types": "./dist/utils/logger.d.ts"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js",
+      "default": "./dist/types/index.js"
+    },
+    "./package.json": "./package.json",
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js",
+      "default": "./dist/cli/index.js"
     }
+  },
+  "repoName": "vokal",
+  "repoType": "TypeScript Project",
+  "hasExistingFiles": {
+    "README.md": true,
+    "CONTRIBUTING.md": false,
+    "CODE_OF_CONDUCT.md": false,
+    ".gitignore": true,
+    ".eslintrc.js": false,
+    ".prettierrc": true
+  },
+  "bugs": {
+    "url": "https://github.com/juspay/vokal/issues"
+  },
+  "homepage": "https://github.com/juspay/vokal#readme",
+  "prettier": {
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "lint-staged": {
+    "src/**/*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }

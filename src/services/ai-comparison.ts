@@ -36,7 +36,12 @@
  */
 
 import { generateText } from '@juspay/neurolink';
-import { ErrorCode, VoiceTestError, getErrorMessage, toError } from '../types/index.js';
+import {
+  ErrorCode,
+  VoiceTestError,
+  getErrorMessage,
+  toError,
+} from '../types/index.js';
 import { ConsoleLogger } from '../utils/logger.js';
 import type {
   AIProvider,
@@ -71,9 +76,14 @@ function parseAIResponse(json: string): ParsedAIResponse {
     isMatch: Boolean(getProp(obj, 'isMatch')),
     score: Number(getProp(obj, 'score')) || 0,
     confidence: Number(getProp(obj, 'confidence')) || 0,
-    analysis: getProp(obj, 'analysis') !== undefined ? String(getProp(obj, 'analysis')) : undefined,
+    analysis:
+      getProp(obj, 'analysis') !== undefined
+        ? String(getProp(obj, 'analysis'))
+        : undefined,
     strengths: Array.isArray(strengthsProp) ? strengthsProp : undefined,
-    improvements: Array.isArray(improvementsProp) ? improvementsProp : undefined,
+    improvements: Array.isArray(improvementsProp)
+      ? improvementsProp
+      : undefined,
   };
 }
 
@@ -118,7 +128,9 @@ export class AIComparisonService {
     this.logger = new ConsoleLogger();
     this.provider = provider as AIProvider;
     this.apiKey = apiKey || this.getApiKeyFromEnv(provider);
-    this.logger.info(`AI Comparison Service initialized with provider: ${provider}`);
+    this.logger.info(
+      `AI Comparison Service initialized with provider: ${provider}`
+    );
   }
 
   /**
@@ -214,8 +226,10 @@ export class AIComparisonService {
     const startTime = Date.now();
 
     try {
-      this.logger.info(`🤖 Analyzing user response with AI...`);
-      this.logger.info(`📝 User said: "${input.userResponse.substring(0, 100)}..."`);
+      this.logger.info('🤖 Analyzing user response with AI...');
+      this.logger.info(
+        `📝 User said: "${input.userResponse.substring(0, 100)}..."`
+      );
 
       // Create detailed prompt for AI comparison
       const comparisonPrompt = this.buildComparisonPrompt(input);
@@ -223,7 +237,8 @@ export class AIComparisonService {
       // Prepare Neurolink options - cast provider to match Neurolink's expected type
       const neurolinkOptions = {
         prompt: comparisonPrompt,
-        provider: this.provider as unknown as import('@juspay/neurolink').AIProviderName,
+        provider: this
+          .provider as unknown as import('@juspay/neurolink').AIProviderName,
         model: this.getOptimalModel(this.provider),
         temperature: 0.3,
         maxTokens: 2048,
@@ -234,8 +249,12 @@ export class AIComparisonService {
       // Use Neurolink with proper options
       const result = await generateText(neurolinkOptions);
 
-      this.logger.info(`🔍 AI Raw Response Length: ${result.content?.length || 0}`);
-      this.logger.info(`🔍 AI Raw Response (FULL): ${result.content || 'EMPTY'}`);
+      this.logger.info(
+        `🔍 AI Raw Response Length: ${result.content?.length || 0}`
+      );
+      this.logger.info(
+        `🔍 AI Raw Response (FULL): ${result.content || 'EMPTY'}`
+      );
 
       // Parse the AI response
       const analysisResult = this.parseAIResponse(result.content);
@@ -369,7 +388,9 @@ Example format:
    * - Repairs incomplete JSON when possible
    * - Falls back to similarity scoring if parsing fails
    */
-  private parseAIResponse(aiResponse: string): Omit<ComparisonResult, 'processingTime'> {
+  private parseAIResponse(
+    aiResponse: string
+  ): Omit<ComparisonResult, 'processingTime'> {
     try {
       // Clean up the response and extract JSON
       let jsonStr = aiResponse.trim();
@@ -388,14 +409,23 @@ Example format:
 
       // Check if JSON seems incomplete (unterminated strings)
       if (!jsonStr.endsWith('}')) {
-        this.logger.warn(`⚠️ JSON appears incomplete, attempting to fix...`);
+        this.logger.warn('⚠️ JSON appears incomplete, attempting to fix...');
         // Try to close any open strings and the object
-        if (!jsonStr.includes('"analysis"') || !jsonStr.includes('"strengths"')) {
+        if (
+          !jsonStr.includes('"analysis"') ||
+          !jsonStr.includes('"strengths"')
+        ) {
           throw new Error('JSON is too incomplete to parse');
         }
         // Simple fix: close unterminated string and add missing fields
-        if (jsonStr.includes('"analysis": "') && !jsonStr.match(/"analysis": "[^"]*"/)) {
-          jsonStr = jsonStr.replace(/"analysis": "([^"]*)$/, '"analysis": "$1"');
+        if (
+          jsonStr.includes('"analysis": "') &&
+          !jsonStr.match(/"analysis": "[^"]*"/)
+        ) {
+          jsonStr = jsonStr.replace(
+            /"analysis": "([^"]*)$/,
+            '"analysis": "$1"'
+          );
         }
         if (!jsonStr.includes('"strengths"')) {
           jsonStr += ', "strengths": [], "improvements": []}';
@@ -443,8 +473,12 @@ Example format:
 
       return result;
     } catch (error) {
-      this.logger.error(`❌ Failed to parse AI response: ${getErrorMessage(error)}`);
-      this.logger.error(`❌ Problematic JSON: ${aiResponse.substring(0, 200)}...`);
+      this.logger.error(
+        `❌ Failed to parse AI response: ${getErrorMessage(error)}`
+      );
+      this.logger.error(
+        `❌ Problematic JSON: ${aiResponse.substring(0, 200)}...`
+      );
 
       // Fallback analysis based on simple similarity
       const similarity = this.calculateSimpleSimilarity(
@@ -458,7 +492,8 @@ Example format:
         score: similarity > 0.6 ? 1 : 0, // Binary scoring
         analysis: `Fallback analysis: Response similarity score ${similarity.toFixed(2)}`,
         strengths: similarity > 0.7 ? ['Response shows some relevance'] : [],
-        improvements: similarity < 0.7 ? ['Response needs significant improvement'] : [],
+        improvements:
+          similarity < 0.7 ? ['Response needs significant improvement'] : [],
       };
     }
   }
@@ -553,7 +588,9 @@ Example format:
       this.logger.info('✅ AI Comparison service test completed successfully');
       return result.score === 1; // Binary scoring: 1 = pass, 0 = fail
     } catch (error) {
-      this.logger.error(`❌ AI Comparison service test failed: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `❌ AI Comparison service test failed: ${getErrorMessage(error)}`
+      );
       return false;
     }
   }
@@ -588,7 +625,10 @@ Example format:
    * const result = await service.compareResponses({ ... });
    * ```
    */
-  static create(provider: string = 'google-ai', apiKey?: string): AIComparisonService {
+  static create(
+    provider: string = 'google-ai',
+    apiKey?: string
+  ): AIComparisonService {
     return new AIComparisonService(provider, apiKey);
   }
 }
