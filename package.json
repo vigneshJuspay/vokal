@@ -22,8 +22,6 @@
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:watch": "tsc --watch",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
     "docs:build": "mkdocs build --strict --clean",
     "docs:serve": "mkdocs serve",
     "docs:gh-deploy": "mkdocs gh-deploy --force",
