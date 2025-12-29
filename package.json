@@ -20,7 +20,7 @@
     "typecheck": "tsc --noEmit",
     "prebuild": "npm run format && npm run lint",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Warning: No tests specified yet\" && exit 0",
     "build:watch": "tsc --watch",
     "docs:build": "mkdocs build --strict --clean",
     "docs:serve": "mkdocs serve",
