@@ -74,7 +74,7 @@
     "prettier": "^3.0.0",
     "semantic-release": "^22.0.12",
     "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.0.0"
