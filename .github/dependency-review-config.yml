@@ -1,0 +1,37 @@
+# Dependency Review Configuration for Vokal
+
+# Fail the action if any of these conditions are met
+fail_on_severity: moderate
+
+# Allowed licenses
+allow-licenses:
+  - MIT
+  - Apache-2.0
+  - ISC
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - 0BSD
+  - CC0-1.0
+  - Unlicense
+  - Python-2.0
+
+# Allow specific packages even if they have known issues
+# (Use sparingly and document why each is allowed)
+allow-dependencies-licenses:
+  - pkg:npm/@types/node
+  - pkg:npm/@types/yargs
+  - pkg:npm/@google-cloud/speech
+  - pkg:npm/@juspay/neurolink
+  - pkg:npm/semantic-release
+  - pkg:pypi/pymdown-extensions  # MIT licensed but metadata may be missing
+
+# Severity thresholds for different dependency types
+comment-summary-in-pr: always
+
+# Additional configuration
+vulnerability-check: true
+license-check: true
+
+# Ignore dev dependencies with known non-critical issues
+allow-ghsas:
+  - GHSA-5j98-mcp5-4vw2 # glob CLI issue (dev only)

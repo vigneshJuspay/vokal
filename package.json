@@ -3,14 +3,13 @@
   "version": "1.0.0",
   "description": "Production voice bot framework with TTS, STT, and AI evaluation using Neurolink",
   "main": "dist/index.js",
-  "type": "module",
+  "types": "dist/index.d.ts",
   "bin": {
     "vokal": "dist/cli/index.js"
   },
   "scripts": {
     "dev": "tsc --watch",
     "build": "npm run clean && tsc",
-    "start": "node dist/index.js",
     "cli": "node dist/cli/index.js",
     "clean": "rm -rf dist",
     "lint": "eslint \"src/**/*.ts\"",
@@ -21,14 +20,9 @@
     "prebuild": "npm run format && npm run lint",
     "prepublishOnly": "npm run build",
     "test": "echo \"Warning: No tests specified yet\" && exit 0",
-    "build:watch": "tsc --watch",
     "docs:build": "mkdocs build --strict --clean",
     "docs:serve": "mkdocs serve",
     "docs:gh-deploy": "mkdocs gh-deploy --force",
-    "validate": "npm run lint && npm run format:check",
-    "validate:all": "npm run validate && npm run test",
-    "prepare": "husky install",
-    "pre-push": "npm run validate:all",
     "release": "semantic-release"
   },
   "keywords": [
@@ -40,9 +34,14 @@
     "neurolink",
     "ai-evaluation",
     "voice-interaction",
-    "conversation-ai"
+    "conversation-ai",
+    "typescript",
+    "nodejs",
+    "google-cloud",
+    "voice-testing",
+    "automated-testing"
   ],
-  "author": "Voice Test Team",
+  "author": "Juspay Technologies",
   "license": "MIT",
   "dependencies": {
     "@google-cloud/speech": "^7.2.1",
@@ -73,22 +72,22 @@
     "lint-staged": "^16.1.5",
     "prettier": "^3.0.0",
     "semantic-release": "^22.0.12",
-    "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
   },
+  "engineStrict": true,
   "overrides": {
-    "ai": "^5.0.52",
     "axios": "^1.7.8",
     "jsondiffpatch": "^0.7.2",
-    "undici": "^6.21.0",
+    "undici": "6.21.2",
     "@qdrant/js-client-rest": "^1.14.1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/vokal.git"
+    "url": "https://github.com/juspay/vokal.git"
   },
   "files": [
     "dist",
@@ -130,20 +129,15 @@
       "default": "./dist/cli/index.js"
     }
   },
-  "repoName": "vokal",
-  "repoType": "TypeScript Project",
-  "hasExistingFiles": {
-    "README.md": true,
-    "CONTRIBUTING.md": false,
-    "CODE_OF_CONDUCT.md": false,
-    ".gitignore": true,
-    ".eslintrc.js": false,
-    ".prettierrc": true
-  },
   "bugs": {
     "url": "https://github.com/juspay/vokal/issues"
   },
-  "homepage": "https://github.com/juspay/vokal#readme",
+  "homepage": "https://juspay.github.io/vokal/",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
   "prettier": {
     "tabWidth": 2,
     "useTabs": false,

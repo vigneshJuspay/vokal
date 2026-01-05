@@ -8,7 +8,7 @@ This document outlines the single commit policy for the vokal repository to ensu
 
 ## Policy Statement
 
-All pull requests to the main branch must be merged using **squash and merge** to maintain a single commit per feature/fix.
+All pull requests to the release branch must be merged using **squash and merge** to maintain a single commit per feature/fix.
 
 ## Benefits
 
@@ -137,14 +137,14 @@ Fixes #456
 ### When NOT to Squash
 
 - **Multiple unrelated changes**: Split into separate PRs
-- **Emergency hotfixes**: May use direct commits to main (with approval)
+- **Emergency hotfixes**: May use direct commits to release (with approval)
 - **Release commits**: Keep as separate commits for tracking
 
 ### Emergency Procedures
 
 For critical hotfixes that need immediate deployment:
 
-1. Create hotfix branch from main
+1. Create hotfix branch from release
 2. Make minimal necessary changes
 3. Get emergency approval from team lead
 4. Merge directly (document the exception)
