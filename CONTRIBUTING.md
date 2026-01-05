@@ -30,13 +30,21 @@ There are several ways you can contribute to vokal:
     npm install
     ```
 
-3.  **Build the project:**
+3.  **Set up Git hooks (for contributors):**
+
+    ```bash
+    npx husky install
+    ```
+
+    This sets up pre-commit and pre-push hooks to enforce code quality. This only needs to be run once after cloning the repo.
+
+4.  **Build the project:**
 
     ```bash
     npm run build
     ```
 
-4.  **Set up credentials:**
+5.  **Set up credentials:**
 
     Create a `.env` file:
     ```bash
@@ -45,7 +53,7 @@ There are several ways you can contribute to vokal:
     GOOGLE_AI_API_KEY=your_api_key_here
     ```
 
-5.  **Test your changes:**
+6.  **Test your changes:**
 
     ```bash
     npm run lint
@@ -79,9 +87,9 @@ There are several ways you can contribute to vokal:
     git push origin fix/my-bug-fix
     ```
 
-7.  **Submit a pull request:** Create a pull request from your branch to the `main` branch of the vokal repository. Provide a clear title and description of your changes.
+7.  **Submit a pull request:** Create a pull request from your branch to the `release` branch of the vokal repository. Provide a clear title and description of your changes.
 8.  **Code Review:** Your pull request will be reviewed by project maintainers. Address any feedback and make necessary changes.
-9.  **Merge:** Once your pull request is approved, it will be merged into the `main` branch.
+9.  **Merge:** Once your pull request is approved, it will be merged into the `release` branch.
 
 ## Coding Standards and Style Guide
 

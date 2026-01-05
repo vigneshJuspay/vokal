@@ -27,8 +27,8 @@
  */
 
 import { promises as fs } from 'fs';
-import { join, dirname, extname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { join, extname, resolve } from 'path';
+import { getRuntimeDir } from '../utils/runtime-path.js';
 import {
   AudioMixer,
   BackgroundSoundPreset,
@@ -39,11 +39,19 @@ import {
   ErrorCode,
 } from '../types/index.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Find project root - go up from dist/src/services to project root
-const projectRoot = resolve(__dirname, '../../../');
+// Get runtime directory in CJS/ESM-safe way
+let projectRoot: string;
+try {
+  const runtimeDir = getRuntimeDir();
+  // Find project root - go up from dist/services to project root (2 levels up)
+  projectRoot = resolve(runtimeDir, '../../');
+} catch (error) {
+  throw new VoiceTestError(
+    'Failed to determine runtime directory for audio assets',
+    ErrorCode.OPERATION_FAILED,
+    toError(error)
+  );
+}
 
 /**
  * Audio Mixer Service for combining speech with background sounds.

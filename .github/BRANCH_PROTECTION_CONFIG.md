@@ -6,7 +6,7 @@
 
 This document outlines the recommended branch protection settings for the vokal repository to ensure code quality and security.
 
-## Main/Master Branch Protection
+## Release Branch Protection
 
 ### Required Settings
 
@@ -75,15 +75,15 @@ For feature branches (`feature/*`, `fix/*`):
 
 1. Go to **Settings** → **Branches**
 2. Click **Add rule**
-3. Set branch name pattern (e.g., `main`, `master`)
+3. Set branch name pattern (e.g., `release`)
 4. Configure protection settings as outlined above
 5. Save the rule
 
 ### Via GitHub CLI
 
 ```bash
-# Enable branch protection for main branch
-gh api repos/juspay/vokal/branches/main/protection \
+# Enable branch protection for release branch
+gh api repos/juspay/vokal/branches/release/protection \
   --method PUT \
   --field required_status_checks='{"strict":true,"contexts":["CI / test","CI / lint","CI / build"]}' \
   --field enforce_admins=true \
@@ -94,9 +94,9 @@ gh api repos/juspay/vokal/branches/main/protection \
 ### Via Terraform
 
 ```hcl
-resource "github_branch_protection" "main" {
+resource "github_branch_protection" "release" {
   repository_id = "vokal"
-  pattern       = "main"
+  pattern       = "release"
 
   required_status_checks {
     strict = true

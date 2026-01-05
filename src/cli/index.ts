@@ -699,38 +699,60 @@ function handleExampleCommand(): void {
   console.log(`
 ${chalk.blue('🎤 Vokal CLI Examples:')}
 
-${chalk.yellow('Basic TTS generation:')}
-  vokal generate "Hello, world!" --language en-US --voice en-US-Neural2-D
-
-${chalk.yellow('With background sound:')}
-  vokal generate "Welcome to our cafe" -l en-US -v en-US-Neural2-F -b cafe --play
-
-${chalk.yellow('Custom settings:')}
-  vokal generate "Fast speech" -l en-US -v en-US-Neural2-A -r 1.5 -p 5.0 -o speech.mp3
-
-${chalk.yellow('List available voices:')}
-  vokal voices en-US
-
-${chalk.yellow('List background sounds:')}
-  vokal backgrounds
-
-${chalk.yellow('Test audio playback:')}
-  vokal test-audio
-
-${chalk.yellow('Play existing audio file:')}
-  vokal play /path/to/audio.mp3
-
-${chalk.yellow('Voice Bot Testing:')}
+${chalk.yellow('Voice Bot Testing (Primary Feature):')}
   vokal test --save-sample              # Create sample config
   vokal test ./config.json              # Run test suite
   vokal test --provider vertex --debug  # Run with Vertex AI
+  vokal test --provider google-ai -q    # Quiet mode for CI/CD
+
+${chalk.yellow('Basic TTS generation:')}
+  vokal voice generate "Hello, world!" --voice en-US-Neural2-D --lang en-US
+  vokal voice generate "Welcome!" --voice en-IN-Neural2-B --lang en-IN
+
+${chalk.yellow('TTS with background audio mixing:')}
+  vokal voice generate "Welcome to our office" --voice en-US-Neural2-F --lang en-US --bg office --bgvol 0.2
+  vokal voice generate "Enjoy your coffee" --voice en-US-Neural2-D --lang en-US --bg cafe --bgvol 0.3 --play
+  vokal voice generate "Listen to nature" --voice en-US-Neural2-A --lang en-US --bg nature --bgvol 0.25
+  vokal voice generate "Call in progress" --voice en-US-Neural2-C --lang en-US --bg phone --bgvol 0.15
+  vokal voice generate "Announcement time" --voice en-US-Neural2-F --lang en-US --bg crowd --bgvol 0.2
+  vokal voice generate "Rainy day message" --voice en-US-Neural2-D --lang en-US --bg rain --bgvol 0.3 --play
+
+${chalk.yellow('Advanced TTS settings:')}
+  vokal voice generate "Fast speech" --voice en-US-Neural2-A --lang en-US --rate 1.5 --pitch 2.0
+  vokal voice generate "Slow and deep" --voice en-US-Neural2-C --lang en-US --rate 0.8 --pitch -5.0
+  vokal voice generate "Custom output" --voice en-US-Neural2-D --lang en-US --output ./my-speech.wav --bg cafe --bgvol 0.2
+
+${chalk.yellow('Voice and audio utilities:')}
+  vokal voices en-US                    # List US English voices
+  vokal voices en-IN                    # List Indian English voices
+  vokal backgrounds                     # Show all background sounds
+  vokal test-audio                      # Test audio playback
+  vokal play /path/to/audio.wav         # Play audio file
 
 ${chalk.blue('Environment Variables:')}
-  GOOGLE_AI_API_KEY    Google AI API key for TTS
-  GEMINI_API_KEY       Alternative name for the API key
+  ${chalk.bold('GOOGLE_APPLICATION_CREDENTIALS')}
+    Path to Google Cloud service account JSON file
+    ${chalk.gray('Required for: TTS, STT, and AI comparison')}
+    ${chalk.gray('Get from: https://console.cloud.google.com/iam-admin/serviceaccounts')}
+
+  ${chalk.bold('GOOGLE_AI_API_KEY / GEMINI_API_KEY')}
+    Google AI API key (alternative to service account for TTS only)
+    ${chalk.gray('Get from: https://aistudio.google.com/apikey')}
+    ${chalk.gray('Note: Service account is recommended for production use')}
+
+${chalk.yellow('Setup Example:')}
+  ${chalk.gray('# Option 1: Service Account (Recommended - works for all features)')}
+  export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+  vokal test ./vokal-config.json
+
+  ${chalk.gray('# Option 2: API Key (TTS only - limited functionality)')}
+  export GOOGLE_AI_API_KEY="your-api-key-here"
+  vokal voice generate "Hello" --voice en-US-Neural2-D --lang en-US
 
 ${chalk.gray('For more help on any command:')}
-  vokal <command> --help
+  vokal test --help
+  vokal voice --help
+  vokal voices --help
 `);
 }
 
@@ -794,6 +816,55 @@ function initializeCliParser(): ReturnType<typeof yargs> {
           handleError(err, 'CLI');
         }
         process.exit(1);
+      })
+      // Test command - PRIMARY FUNCTIONALITY (show first)
+      // @ts-expect-error - Yargs type inference creates complex types that don't exactly match TestCommandArgs, but runtime behavior is correct
+      .command({
+        command: 'test [config]',
+        describe: 'Run voice bot test suite',
+        builder: (yargs) => {
+          return yargs
+            .positional('config', {
+              type: 'string',
+              description: 'Path to test configuration JSON file',
+              default: './vokal-config.json',
+            })
+            .options({
+              'save-sample': {
+                type: 'boolean',
+                description: 'Save a sample configuration file and exit',
+                default: false,
+              },
+              'api-key': {
+                type: 'string',
+                description: 'API key (overrides environment variable)',
+              },
+              provider: {
+                type: 'string',
+                choices: ['bedrock', 'vertex', 'openai', 'google-ai'],
+                default: 'google-ai',
+                description: 'AI provider for response analysis',
+              },
+              quiet: {
+                type: 'boolean',
+                alias: 'q',
+                default: false,
+                description: 'Suppress non-essential output',
+              },
+              verbose: {
+                type: 'boolean',
+                alias: 'v',
+                default: false,
+                description: 'Enable verbose logging',
+              },
+              debug: {
+                type: 'boolean',
+                default: false,
+                description: 'Enable debug mode with verbose output',
+              },
+            });
+        },
+        handler: handleTestCommand,
       })
       // Voice command with generate subcommand
       .command({
@@ -960,55 +1031,6 @@ function initializeCliParser(): ReturnType<typeof yargs> {
             });
         },
         handler: handlePlayCommand,
-      })
-      // Test command
-      // @ts-expect-error - Yargs type inference creates complex types that don't exactly match TestCommandArgs, but runtime behavior is correct
-      .command({
-        command: 'test [config]',
-        describe: 'Run voice bot test suite',
-        builder: (yargs) => {
-          return yargs
-            .positional('config', {
-              type: 'string',
-              description: 'Path to test configuration JSON file',
-              default: './vokal-config.json',
-            })
-            .options({
-              'save-sample': {
-                type: 'boolean',
-                description: 'Save a sample configuration file and exit',
-                default: false,
-              },
-              'api-key': {
-                type: 'string',
-                description: 'API key (overrides environment variable)',
-              },
-              provider: {
-                type: 'string',
-                choices: ['bedrock', 'vertex', 'openai', 'google-ai'],
-                default: 'google-ai',
-                description: 'AI provider for response analysis',
-              },
-              quiet: {
-                type: 'boolean',
-                alias: 'q',
-                default: false,
-                description: 'Suppress non-essential output',
-              },
-              verbose: {
-                type: 'boolean',
-                alias: 'v',
-                default: false,
-                description: 'Enable verbose logging',
-              },
-              debug: {
-                type: 'boolean',
-                default: false,
-                description: 'Enable debug mode with verbose output',
-              },
-            });
-        },
-        handler: handleTestCommand,
       })
       // Example command
       .command({

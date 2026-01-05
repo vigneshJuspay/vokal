@@ -3,7 +3,7 @@
 > A production-ready voice bot testing and interaction framework with streaming Speech-to-Text, Text-to-Speech, and AI-powered evaluation
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![NPM Package](https://img.shields.io/badge/npm-%40juspay%2Fvokal-red.svg)](https://www.npmjs.com/package/@juspay/vokal)
 
@@ -55,8 +55,8 @@ Vokal is a comprehensive TypeScript framework for building, testing, and evaluat
 ### Prerequisites
 
 ```bash
-node -v  # Should be 18.x or higher
-npm -v   # Should be 8.x or higher
+node -v  # Should be 20.x or higher
+npm -v   # Should be 9.x or higher
 ```
 
 ### Install Vokal

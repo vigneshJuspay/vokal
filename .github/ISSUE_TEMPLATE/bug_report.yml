@@ -2,8 +2,7 @@ name: Bug Report
 description: File a bug report
 title: '[Bug]: '
 labels: ['bug', 'needs triage']
-assignees:
-  - { { maintainerUsername } }
+assignees: []
 body:
   - type: markdown
     attributes:
@@ -38,16 +37,21 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: browsers
+    id: environment
     attributes:
-      label: What browsers are you seeing the problem on?
+      label: Environment
+      description: What environment are you running vokal in?
       multiple: true
       options:
-        - Firefox
-        - Chrome
-        - Safari
-        - Microsoft Edge
+        - Node.js 20.x
+        - Node.js 22.x
+        - macOS
+        - Linux
+        - Windows
+        - Docker
         - Other
+    validations:
+      required: true
   - type: textarea
     id: logs
     attributes:
@@ -58,7 +62,7 @@ body:
     id: terms
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/juspay/vokal/blob/main/CODE_OF_CONDUCT.md)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/juspay/vokal/blob/release/CODE_OF_CONDUCT.md)
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true

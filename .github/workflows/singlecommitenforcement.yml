@@ -2,9 +2,9 @@ name: Single Commit Per Branch Enforcement
 
 on:
   push:
-    branches-ignore: [release, main, develop]
+    branches-ignore: [release]
   pull_request:
-    branches: [release, main]
+    branches: [release]
     types: [opened, synchronize, reopened]
 
 concurrency:
@@ -34,7 +34,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE_BRANCH="origin/${{ github.base_ref }}"
             BRANCH_NAME="${{ github.head_ref }}"
-            
+
             # Handle external vs internal contributors differently using repository IDs for security
             if [ "${{ github.event.pull_request.head.repo.id }}" != "${{ github.event.repository.id }}" ]; then
               # External contributor - use the PR head SHA directly
@@ -43,7 +43,7 @@ jobs:
               echo "🔍 Head repository ID: ${{ github.event.pull_request.head.repo.id }}"
               echo "🔍 Base repository ID: ${{ github.event.repository.id }}"
               echo "🔍 Using PR head SHA: ${{ github.event.pull_request.head.sha }}"
-              
+
               # For external PRs, checkout the actual PR commit (not the merge commit)
               echo "🔄 Checking out PR head commit for validation..."
               git checkout "${{ github.event.pull_request.head.sha }}"
@@ -84,24 +84,24 @@ jobs:
           elif [ $COMMIT_COUNT -eq 1 ]; then
             echo "✅ Branch contains exactly 1 commit - POLICY COMPLIANT"
             echo "status=compliant" >> $GITHUB_OUTPUT
-            
+
             # Get the single commit details
             COMMIT_HASH=$(git rev-list -1 $CURRENT_BRANCH ^$BASE_BRANCH)
             COMMIT_MSG=$(git log -1 --pretty=format:"%s" $COMMIT_HASH)
             COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an" $COMMIT_HASH)
-            
+
             echo "📝 Commit: $COMMIT_MSG"
             echo "👤 Author: $COMMIT_AUTHOR"
             echo "🔑 Hash: $COMMIT_HASH"
-            
+
             echo "commit_message=$COMMIT_MSG" >> $GITHUB_OUTPUT
             echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
             echo "commit_author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
-            
+
           else
             echo "❌ POLICY VIOLATION: Branch contains $COMMIT_COUNT commits"
             echo "status=violation" >> $GITHUB_OUTPUT
-            
+
             # Get details of all commits for the error message
             echo "📋 Commits in this branch:"
             git log --oneline $CURRENT_BRANCH ^$BASE_BRANCH
@@ -113,7 +113,7 @@ jobs:
           COMMIT_MSG="${{ steps.validate.outputs.commit_message }}"
           echo "🔍 Validating commit message format: '$COMMIT_MSG'"
 
-          # Check semantic commit format: type(scope): description  
+          # Check semantic commit format: type(scope): description
           if ! echo "$COMMIT_MSG" | grep -qE "^[a-z]+\([^)]+\): .+"; then
             echo "❌ Commit message doesn't follow semantic format"
             echo "Expected: type(scope): description"
@@ -204,7 +204,7 @@ jobs:
         continue-on-error: true
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: "github-actions[bot]"
+          comment-author: 'github-actions[bot]'
           body-includes: Single Commit Policy
 
       - name: Post Minimal Success Comment
@@ -255,7 +255,7 @@ jobs:
               echo "✅ Ready for merge to release branch"
               ;;
             "violation")
-              echo "❌ STATUS: POLICY VIOLATION" 
+              echo "❌ STATUS: POLICY VIOLATION"
               echo "❌ Multiple commits detected"
               echo "🔧 Squashing required before merge"
               ;;
@@ -271,7 +271,7 @@ jobs:
           echo ""
           echo "📋 Policy Requirements:"
           echo "  • Exactly 1 commit per branch"
-          echo "  • Semantic commit message format: type(scope): description" 
+          echo "  • Semantic commit message format: type(scope): description"
           echo "  • No merge commits allowed"
           echo "  • Squash merge enforced at branch protection level"
           echo ""

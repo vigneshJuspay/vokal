@@ -1,12 +1,12 @@
 site_name: vokal
 site_description: Production voice bot framework with TTS, STT, and AI evaluation using Neurolink
 site_author: juspay-maintainers
-site_url: https://vokal.github.io/
+site_url: https://juspay.github.io/vokal/
 
 # Repository
 repo_name: vokal
 repo_url: https://github.com/juspay/vokal
-edit_uri: edit/main/docs/
+edit_uri: edit/release/docs/
 
 # Copyright
 copyright: Copyright &copy; 2023 - 2025 juspay-maintainers
@@ -61,7 +61,7 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/juspay/vokal
     - icon: fontawesome/brands/npm
-      link: https://www.npmjs.com/package/vokal
+      link: https://www.npmjs.com/package/@juspay/vokal
 
 # Extensions
 markdown_extensions:
@@ -79,9 +79,6 @@ markdown_extensions:
       smart_enable: all
   - pymdownx.caret
   - pymdownx.details
-  - pymdownx.emoji:
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-      emoji_index: !!python/name:materialx.emoji.twemoji
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
@@ -96,7 +93,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+          format: pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
@@ -107,25 +104,26 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quick-start.md
-    - Configuration: getting-started/configuration.md
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quick-start.md
+      - Configuration: getting-started/configuration.md
   - User Guide:
-    - Overview: user-guide/overview.md
-    - Features: user-guide/features.md
-    - Examples: user-guide/examples.md
+      - Overview: user-guide/overview.md
+      - SDK Usage: user-guide/sdk-usage.md
+      - Features: user-guide/features.md
+      - Examples: user-guide/examples.md
   - API Reference:
-    - Overview: api/overview.md
-    - Methods: api/methods.md
-    - Types: api/types.md
+      - Overview: api/overview.md
+      - Methods: api/methods.md
+      - Types: api/types.md
   - Development:
-    - Contributing: development/contributing.md
-    - Architecture: development/architecture.md
-    - Testing: development/testing.md
+      - Contributing: development/contributing.md
+      - Architecture: development/architecture.md
+      - Testing: development/testing.md
   - About:
-    - License: about/license.md
-    - Changelog: about/changelog.md
-    - Support: about/support.md
+      - License: about/license.md
+      - Changelog: about/changelog.md
+      - Support: about/support.md
 
 # Extra CSS
 extra_css:

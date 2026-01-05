@@ -1,8 +1,27 @@
 # Global owners
-* @juspay/vokal-maintainers
+
+- @juspay-maintainers
+
+# Core source code
+
+/src/\*\* @juspay-maintainers
 
 # Documentation
-*.md @juspay/docs-team
 
-# GitHub workflows
-/.github/ @juspay/devops-team
+\*.md @juspay-maintainers
+/docs/\*\* @juspay-maintainers
+
+# GitHub workflows and configs
+
+/.github/ @juspay-maintainers
+
+# Configuration files
+
+_.json @juspay-maintainers
+_.yml @juspay-maintainers
+\*.yaml @juspay-maintainers
+
+# Build and tooling
+
+/scripts/ @juspay-maintainers
+tsconfig\*.json @juspay-maintainers
