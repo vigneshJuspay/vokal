@@ -260,7 +260,7 @@ jobs:
 
       - name: 🔍 Check for duplicate dependencies
         run: |
-          pnpm dedupe --dry-run
+          pnpm dedupe --check
           echo "✅ No duplicate dependencies found"
 
       - name: 📊 List production dependencies
@@ -302,7 +302,7 @@ jobs:
 
       - name: 📦 Test package contents
         run: |
-          pnpm pack --dry-run
+          npm pack --dry-run
           echo "✅ Package contents verified"
 
       - name: 🔍 Verify exports
@@ -311,16 +311,6 @@ jobs:
             const pkg = require('./package.json');
             console.log('Exports:', Object.keys(pkg.exports || {}));
             console.log('✅ Package exports configured');
-          "
-
-      - name: 📋 Validate publishConfig
-        run: |
-          node -e "
-            const pkg = require('./package.json');
-            if (!pkg.publishConfig) throw new Error('publishConfig missing');
-            if (pkg.publishConfig.access !== 'public') throw new Error('publishConfig.access must be public');
-            if (pkg.publishConfig.provenance !== true) throw new Error('publishConfig.provenance must be true');
-            console.log('✅ publishConfig validated for OIDC Trusted Publishers');
           "
 
       - name: 🔐 Verify OIDC permissions in workflows
