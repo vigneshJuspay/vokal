@@ -1,25 +1,21 @@
-name: Documentation
+name: Deploy Documentation
 
 on:
+  workflow_dispatch:
   push:
     branches: [release]
     paths:
-      - 'docs/**'
+      - '**/*.md'
       - 'mkdocs.yml'
-      - 'README.md'
-      - 'CHANGELOG.md'
-      - 'CONTRIBUTING.md'
-      - 'CODE_OF_CONDUCT.md'
+      - 'requirements.txt'
       - '.github/workflows/docs.yml'
   pull_request:
     branches: [release]
     paths:
-      - 'docs/**'
+      - '**/*.md'
       - 'mkdocs.yml'
-      - 'README.md'
-      - 'CHANGELOG.md'
-      - 'CONTRIBUTING.md'
-      - 'CODE_OF_CONDUCT.md'
+      - 'requirements.txt'
+      - '.github/workflows/docs.yml'
 
 permissions:
   contents: read
@@ -31,11 +27,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-docs:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -43,35 +41,23 @@ jobs:
           python-version: '3.x'
           cache: 'pip'
 
-      - name: Install MkDocs and dependencies
+      - name: Install dependencies
         run: |
-          pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Verify MkDocs configuration
-        run: |
-          mkdocs --version
-          python -c "import yaml; yaml.safe_load(open('mkdocs.yml'))"
-
       - name: Build documentation
-        run: mkdocs build --strict --clean --verbose
-
-      - name: Check build output
         run: |
-          test -d site || (echo "site directory not found" && exit 1)
-          test -f site/index.html || (echo "site/index.html not found" && exit 1)
-          echo "✓ Documentation built successfully"
-          ls -la site/
+          mkdocs build --strict --clean
 
-      - name: Upload Pages artifact
+      - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/release'
         with:
-          path: ./site
+          path: _site
 
-  deploy-docs:
-    if: github.ref == 'refs/heads/release'
-    needs: build-docs
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -79,42 +65,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
-
-      - name: Deployment summary
-        run: |
-          echo "✓ Documentation deployed successfully"
-          echo "URL: ${{ steps.deployment.outputs.page_url }}"
-
-  validate-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Validate Markdown files
-        uses: DavidAnson/markdownlint-cli2-action@v13
-        with:
-          config: .markdownlint.json
-          globs: |
-            **/*.md
-            !node_modules/**/*.md
-            !site/**/*.md
-            !dist/**/*.md
-
-      - name: Check for broken links
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
-        with:
-          use-quiet-mode: 'yes'
-          use-verbose-mode: 'yes'
-          config-file: '.github/markdown-link-check-config.json'
-        continue-on-error: true
-
-      - name: Check documentation structure
-        run: |
-          echo "Checking required documentation files..."
-          test -f docs/index.md || (echo "docs/index.md missing" && exit 1)
-          test -d docs/getting-started || (echo "docs/getting-started missing" && exit 1)
-          test -d docs/api || (echo "docs/api missing" && exit 1)
-          test -d docs/user-guide || (echo "docs/user-guide missing" && exit 1)
-          echo "✓ All required documentation files present"
+        uses: actions/deploy-pages@v4

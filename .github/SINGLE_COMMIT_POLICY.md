@@ -194,7 +194,7 @@ Use pre-receive hooks to enforce policy:
 Use commitlint to validate commit messages:
 
 ```bash
-npm install --save-dev @commitlint/cli @commitlint/config-conventional
+pnpm add -D @commitlint/cli @commitlint/config-conventional
 ```
 
 ## Training

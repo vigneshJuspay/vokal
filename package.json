@@ -2,14 +2,32 @@
   "name": "@juspay/vokal",
   "version": "1.0.0",
   "description": "Production voice bot framework with TTS, STT, and AI evaluation using Neurolink",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "vokal": "dist/cli/index.js"
+  "author": {
+    "name": "Juspay Technologies",
+    "email": "support@juspay.in",
+    "url": "https://juspay.io"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/juspay/vokal#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juspay/vokal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/juspay/vokal/issues"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/juspay"
+  },
+  "engines": {
+    "node": ">=20.18.1",
+    "npm": ">=10.0.0",
+    "pnpm": ">=8.0.0"
   },
   "scripts": {
     "dev": "tsc --watch",
-    "build": "npm run clean && tsc",
+    "build": "pnpm run clean && tsc",
     "cli": "node dist/cli/index.js",
     "clean": "rm -rf dist",
     "lint": "eslint \"src/**/*.ts\"",
@@ -17,13 +35,98 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prebuild": "npm run format && npm run lint",
-    "prepublishOnly": "npm run build",
+    "prebuild": "pnpm run format && pnpm run lint",
+    "prepublishOnly": "pnpm run build",
     "test": "echo \"Warning: No tests specified yet\" && exit 0",
     "docs:build": "mkdocs build --strict --clean",
     "docs:serve": "mkdocs serve",
     "docs:gh-deploy": "mkdocs gh-deploy --force",
     "release": "semantic-release"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*",
+    "!dist/**/*.map",
+    "assets",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "vokal": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/voice-test.errors.d.ts",
+      "import": "./dist/errors/voice-test.errors.js",
+      "default": "./dist/errors/voice-test.errors.js"
+    },
+    "./constants": {
+      "types": "./dist/constants/audio.constants.d.ts",
+      "import": "./dist/constants/audio.constants.js",
+      "default": "./dist/constants/audio.constants.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/validation.d.ts",
+      "import": "./dist/utils/validation.js",
+      "default": "./dist/utils/validation.js"
+    },
+    "./logger": {
+      "types": "./dist/utils/logger.d.ts",
+      "import": "./dist/utils/logger.js",
+      "default": "./dist/utils/logger.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js",
+      "default": "./dist/types/index.js"
+    },
+    "./package.json": "./package.json",
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js",
+      "default": "./dist/cli/index.js"
+    }
+  },
+  "dependencies": {
+    "@google-cloud/speech": "^7.2.1",
+    "@juspay/neurolink": "^8.19.0",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "node-record-lpcm16": "^1.0.1",
+    "ora": "^7.0.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.0.0",
+    "@commitlint/config-conventional": "^17.0.0",
+    "@eslint/js": "^9.0.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/npm": "^13.1.2",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "@types/node": "^20.19.18",
+    "@types/yargs": "^17.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "globals": "^15.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "prettier": "^3.0.0",
+    "semantic-release": "^24.2.8",
+    "typescript": "^5.0.0"
   },
   "keywords": [
     "voice-bot",
@@ -39,114 +142,35 @@
     "nodejs",
     "google-cloud",
     "voice-testing",
-    "automated-testing"
+    "automated-testing",
+    "juspay"
   ],
-  "author": "Juspay Technologies",
-  "license": "MIT",
-  "dependencies": {
-    "@google-cloud/speech": "^7.2.1",
-    "@juspay/neurolink": "^8.19.0",
-    "chalk": "^5.3.0",
-    "dotenv": "^16.4.5",
-    "node-record-lpcm16": "^1.0.1",
-    "ora": "^7.0.1",
-    "yargs": "^17.7.2"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^17.0.0",
-    "@commitlint/config-conventional": "^17.0.0",
-    "@eslint/js": "^9.0.0",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^11.0.0",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^9.0.0",
-    "@semantic-release/npm": "^11.0.3",
-    "@semantic-release/release-notes-generator": "^12.0.0",
-    "@types/node": "^20.19.18",
-    "@types/yargs": "^17.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.0.0",
-    "globals": "^15.0.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.5",
-    "prettier": "^3.0.0",
-    "semantic-release": "^22.0.12",
-    "typescript": "^5.0.0"
-  },
-  "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=9.0.0"
-  },
-  "engineStrict": true,
-  "overrides": {
-    "axios": "^1.7.8",
-    "jsondiffpatch": "^0.7.2",
-    "undici": "6.21.2",
-    "@qdrant/js-client-rest": "^1.14.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/juspay/vokal.git"
-  },
-  "files": [
-    "dist",
-    "assets",
-    "README.md",
-    "LICENSE"
-  ],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./errors": {
-      "import": "./dist/errors/voice-test.errors.js",
-      "types": "./dist/errors/voice-test.errors.d.ts"
-    },
-    "./constants": {
-      "import": "./dist/constants/audio.constants.js",
-      "types": "./dist/constants/audio.constants.d.ts"
-    },
-    "./utils": {
-      "import": "./dist/utils/validation.js",
-      "types": "./dist/utils/validation.d.ts"
-    },
-    "./logger": {
-      "import": "./dist/utils/logger.js",
-      "types": "./dist/utils/logger.d.ts"
-    },
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.js",
-      "default": "./dist/types/index.js"
-    },
-    "./package.json": "./package.json",
-    "./cli": {
-      "types": "./dist/cli/index.d.ts",
-      "import": "./dist/cli/index.js",
-      "default": "./dist/cli/index.js"
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "protobufjs"
+    ],
+    "overrides": {
+      "cookie@<0.7.0": ">=0.7.0",
+      "axios@<1.8.2": ">=1.8.2",
+      "@semantic-release/npm": "^13.1.2"
     }
   },
-  "bugs": {
-    "url": "https://github.com/juspay/vokal/issues"
-  },
-  "homepage": "https://juspay.github.io/vokal/",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "provenance": true
-  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
   "prettier": {
     "tabWidth": 2,
     "useTabs": false,
     "semi": true,
     "singleQuote": true,
-    "trailingComma": "es5"
+    "trailingComma": "es5",
+    "proseWrap": "preserve"
   },
   "lint-staged": {
-    "src/**/*.{js,ts,jsx,tsx}": [
+    "src/**/*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ],

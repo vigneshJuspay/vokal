@@ -56,13 +56,13 @@ Vokal is a comprehensive TypeScript framework for building, testing, and evaluat
 
 ```bash
 node -v  # Should be 20.x or higher
-npm -v   # Should be 9.x or higher
+pnpm -v  # Should be 9.x or higher (npm or yarn also work)
 ```
 
 ### Install Vokal
 
 ```bash
-npm install @juspay/vokal
+pnpm add @juspay/vokal
 ```
 
 Or clone and build from source:
@@ -70,8 +70,8 @@ Or clone and build from source:
 ```bash
 git clone https://github.com/juspay/vokal.git
 cd vokal
-npm install
-npm run build
+pnpm install
+pnpm run build
 ```
 
 ### Set Up Credentials
@@ -359,29 +359,29 @@ Vokal follows security best practices:
 
 ```bash
 # Build the project
-npm run build
+pnpm run build
 
 # Run linting
-npm run lint
+pnpm run lint
 
 # Format code
-npm run format
+pnpm run format
 
 # Type checking
-npm run typecheck
+pnpm run typecheck
 ```
 
 ## 📦 NPM Scripts
 
 | Script | Description |
 |--------|-------------|
-| `npm run build` | Build TypeScript to JavaScript (`dist/`) |
-| `npm run dev` | Build in watch mode |
-| `npm run clean` | Clean build directory |
-| `npm run lint` | Lint code with ESLint |
-| `npm run format` | Format code with Prettier |
-| `npm run typecheck` | Run TypeScript type checking |
-| `npm run prebuild` | Format and lint before build |
+| `pnpm run build` | Build TypeScript to JavaScript (`dist/`) |
+| `pnpm run dev` | Build in watch mode |
+| `pnpm run clean` | Clean build directory |
+| `pnpm run lint` | Lint code with ESLint |
+| `pnpm run format` | Format code with Prettier |
+| `pnpm run typecheck` | Run TypeScript type checking |
+| `pnpm run prebuild` | Format and lint before build |
 
 ## 🤝 Contributing
 

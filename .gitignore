@@ -6,7 +6,6 @@ yarn-error.log*
 pnpm-debug.log*
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
 
 # Environment files
 .env
@@ -22,6 +21,7 @@ build/
 
 # Documentation build (MkDocs)
 site/
+_site/
 .mkdocs_cache/
 
 # Python (MkDocs dependencies)
@@ -124,4 +124,3 @@ Thumbs.db
 
 # Lock files (keep npm but ignore others)
 # package-lock.json is ignored above
-# pnpm-lock.yaml is ignored above

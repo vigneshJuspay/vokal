@@ -23,9 +23,9 @@ This directory contains example configurations and code templates for the vokal 
 
 1. **Install vokal:**
    ```bash
-   npm install @juspay/vokal
+   pnpm add @juspay/vokal
    # Or from source
-   cd vokal && npm install && npm run build
+   cd vokal && pnpm install && pnpm run build
    ```
 
 2. **Set up credentials:**

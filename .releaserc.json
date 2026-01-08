@@ -18,43 +18,27 @@
           { "type": "ci", "release": false },
           { "type": "chore", "release": false },
           { "breaking": true, "release": "major" }
-        ]
+        ],
+        "parserOpts": {
+          "headerPattern": "^(?:\\w+-\\d+:\\s*)?(\\w+!?)(\\([\\w\\$\\.\\-\\*\\s]*\\))?\\s*:(.*)$",
+          "headerCorrespondence": ["type", "scope", "subject"],
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BREAKING"]
+        }
       }
     ],
     [
       "@semantic-release/release-notes-generator",
       {
         "preset": "conventionalcommits",
-        "presetConfig": {
-          "types": [
-            { "type": "feat", "section": "Features" },
-            { "type": "fix", "section": "Bug Fixes" },
-            { "type": "perf", "section": "Performance Improvements" },
-            { "type": "revert", "section": "Reverts" },
-            { "type": "docs", "section": "Documentation", "hidden": false },
-            { "type": "style", "section": "Styles", "hidden": true },
-            {
-              "type": "chore",
-              "section": "Miscellaneous Chores",
-              "hidden": true
-            },
-            {
-              "type": "refactor",
-              "section": "Code Refactoring",
-              "hidden": true
-            },
-            { "type": "test", "section": "Tests", "hidden": true },
-            { "type": "build", "section": "Build System", "hidden": true },
-            {
-              "type": "ci",
-              "section": "Continuous Integration",
-              "hidden": true
-            }
-          ]
+        "parserOpts": {
+          "headerPattern": "^(?:\\w+-\\d+:\\s*)?(\\w+!?)(\\([\\w\\$\\.\\-\\*\\s]*\\))?\\s*:(.*)$",
+          "headerCorrespondence": ["type", "scope", "subject"],
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BREAKING"]
         }
       }
     ],
     "@semantic-release/changelog",
+    "./scripts/semantic-release-format-plugin.cjs",
     [
       "@semantic-release/npm",
       {

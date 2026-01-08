@@ -1,69 +1,75 @@
-site_name: vokal
-site_description: Production voice bot framework with TTS, STT, and AI evaluation using Neurolink
-site_author: juspay-maintainers
-site_url: https://juspay.github.io/vokal/
+site_name: 'Vokal'
+site_description: 'Production voice bot framework with TTS, STT, and AI evaluation using Neurolink'
+site_url: 'https://juspay.github.io/vokal'
+repo_url: 'https://github.com/juspay/vokal'
+repo_name: 'juspay/vokal'
+edit_uri: 'edit/release/docs/'
 
-# Repository
-repo_name: vokal
-repo_url: https://github.com/juspay/vokal
-edit_uri: edit/release/docs/
+# Build settings
+docs_dir: 'docs'
+# Use '_site' instead of the default 'site' directory for the following reasons:
+# 1. Alignment with GitHub Pages deployment workflow expectations
+# 2. Avoids potential conflicts with other static site generators and tools
+# 3. Provides clear distinction for MkDocs-specific output directory
+# 4. Follows modern convention for build artifacts separation
+site_dir: '_site'
 
-# Copyright
-copyright: Copyright &copy; 2023 - 2025 juspay-maintainers
-
-# Configuration
+# Theme configuration
 theme:
   name: material
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - toc.integrate
   palette:
-    # Palette toggle for light mode
-    - scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    # Palette toggle for dark mode
     - scheme: slate
       primary: indigo
       accent: indigo
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
   font:
     text: Roboto
     code: Roboto Mono
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.expand
-    - navigation.path
-    - navigation.indexes
-    - toc.follow
-    - search.suggest
-    - search.highlight
-    - content.tabs.link
-    - content.code.annotation
-    - content.code.copy
-  language: en
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
 
 # Plugins
 plugins:
   - search:
+      lang: en
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
-  - minify:
-      minify_html: true
 
-# Customization
-extra:
-  version:
-    provider: mike
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/juspay/vokal
-    - icon: fontawesome/brands/npm
-      link: https://www.npmjs.com/package/@juspay/vokal
-
-# Extensions
+# Markdown extensions
 markdown_extensions:
   - abbr
   - admonition
@@ -73,34 +79,39 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+      title: Page contents
+  - tables
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.betterem:
       smart_enable: all
   - pymdownx.caret
   - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.keys
   - pymdownx.magiclink:
+      normalize_issue_symbols: true
       repo_url_shorthand: true
       user: juspay
       repo: vokal
   - pymdownx.mark
   - pymdownx.smartsymbols
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: pymdownx.superfences.fence_code_format
+  - pymdownx.snippets
+  - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
 
-# Page tree
+# Page navigation
 nav:
   - Home: index.md
   - Getting Started:
@@ -125,12 +136,20 @@ nav:
       - Changelog: about/changelog.md
       - Support: about/support.md
 
-# Extra CSS
-extra_css:
-  - stylesheets/extra.css
+# Social links and extras
+extra:
+  version:
+    provider: mike
+    default: latest
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/juspay/vokal
+      name: GitHub Repository
+    - icon: fontawesome/brands/npm
+      link: https://www.npmjs.com/package/@juspay/vokal
+      name: NPM Package
+  generator: false
 
-# Extra JavaScript
-extra_javascript:
-  - javascripts/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+# Copyright
+copyright: |
+  &copy; 2024-2026 <a href="https://juspay.io" target="_blank" rel="noopener">Juspay Technologies Pvt. Ltd.</a>

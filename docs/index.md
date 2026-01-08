@@ -47,7 +47,7 @@ Vokal is a comprehensive TypeScript framework for building, testing, and evaluat
 
 ```bash
 # Install Vokal
-npm install @juspay/vokal
+pnpm add @juspay/vokal
 
 # Set up credentials
 echo 'GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json' > .env

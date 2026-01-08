@@ -27,7 +27,7 @@ There are several ways you can contribute to vokal:
 2.  **Install dependencies:**
 
     ```bash
-    npm install
+    pnpm install
     ```
 
 3.  **Set up Git hooks (for contributors):**
@@ -41,7 +41,7 @@ There are several ways you can contribute to vokal:
 4.  **Build the project:**
 
     ```bash
-    npm run build
+    pnpm run build
     ```
 
 5.  **Set up credentials:**
@@ -56,10 +56,10 @@ There are several ways you can contribute to vokal:
 6.  **Test your changes:**
 
     ```bash
-    npm run lint
-    npm run format
-    npm run typecheck
-    npm run build
+    pnpm run lint
+    pnpm run format
+    pnpm run typecheck
+    pnpm run build
     ```
 
 ## Pull Request Process
@@ -143,15 +143,15 @@ refactor(voice-test): simplify TTS generation logic
 *   Run the linter and formatter:
 
     ```bash
-    npm run lint
-    npm run format
-    npm run typecheck
+    pnpm run lint
+    pnpm run format
+    pnpm run typecheck
     ```
 
 *   Verify the build succeeds:
 
     ```bash
-    npm run build
+    pnpm run build
     ```
 
 ## Project Structure

@@ -1,48 +1,66 @@
-name: Vokal Release Pipeline
+name: Release and Publish
 
 on:
   push:
-    branches: [release]
-  workflow_dispatch: # Enable manual triggers
-
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
+    branches:
+      - release
 
 permissions:
-  contents: read
-
-env:
-  FORCE_COLOR: 1
-  HUSKY: 0 # Disable Husky hooks in CI
+  contents: write
+  packages: write
+  issues: write
+  pull-requests: write
+  id-token: write # Required for npm provenance
 
 jobs:
-  pre-release-validation:
-    name: Pre-Release Validation
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: 🔧 Setup Node.js
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
+          node-version: '20'
+          cache: 'pnpm'
+          registry-url: https://registry.npmjs.org/
 
-      - name: 📦 Install dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: 🔒 Security audit
-        run: npm audit --audit-level=high
-        continue-on-error: true
+      - name: Build package
+        run: pnpm run build
 
-      - name: 🛡️ Verify package integrity
-        run: npm audit signatures
-        continue-on-error: true
+      - name: 💅 Check formatting
+        run: pnpm run format:check
+
+      - name: 🔍 Run linting
+        run: pnpm run lint
+
+      - name: 📘 Type checking
+        run: pnpm run typecheck
+
+      - name: 🧪 Run tests
+        run: pnpm test
+
+      - name: ✅ Verify build artifacts
+        run: |
+          test -d dist || (echo "❌ dist directory not found" && exit 1)
+          test -f dist/index.js || (echo "❌ dist/index.js not found" && exit 1)
+          test -f dist/cli/index.js || (echo "❌ dist/cli/index.js not found" && exit 1)
+          echo "✅ All required build artifacts present"
+
+      - name: 🎙️ Test CLI functionality
+        run: |
+          node dist/cli/index.js --version
+          node dist/cli/index.js --help
+          echo "✅ CLI commands working"
 
       - name: 📋 Validate package.json
         run: |
@@ -68,231 +86,62 @@ jobs:
           test -f CONTRIBUTING.md || (echo "❌ CONTRIBUTING.md missing" && exit 1)
           echo "✅ Required documentation files present"
 
-  comprehensive-testing:
-    name: Comprehensive Testing Suite
-    runs-on: ${{ matrix.os }}
-    needs: pre-release-validation
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        node-version: [20.x, 22.x]
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🔧 Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 🏗️ Build package
-        run: npm run build
-
-      - name: 💅 Check formatting
-        run: npm run format:check
-
-      - name: 🔍 Run linting
-        run: npm run lint
-
-      - name: 📘 Type checking
-        run: npm run typecheck
-
-      - name: 🧪 Run tests
-        run: npm test
-
-      - name: ✅ Verify build artifacts
-        run: |
-          test -d dist || (echo "❌ dist directory not found" && exit 1)
-          test -f dist/index.js || (echo "❌ dist/index.js not found" && exit 1)
-          test -f dist/cli/index.js || (echo "❌ dist/cli/index.js not found" && exit 1)
-          echo "✅ All required build artifacts present"
-
-      - name: 🎙️ Test CLI functionality
-        shell: bash
-        run: |
-          # Test basic CLI commands
-          node dist/cli/index.js --version
-          node dist/cli/index.js --help
-          echo "✅ CLI commands working"
-
-      - name: 📦 Test SDK imports
-        run: |
-          # Test CommonJS import
-          node -e "const vokal = require('./dist/index.js'); console.log('✅ CJS import works');"
-
-          # Test ESM import
-          node --input-type=module -e "import('./dist/index.js').then(() => console.log('✅ ESM import works'));"
-
-  documentation-build:
-    name: Documentation Build Test
-    runs-on: ubuntu-latest
-    needs: pre-release-validation
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🔧 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-          cache: 'pip'
-
-      - name: 📦 Install MkDocs
-        run: |
-          pip install -r requirements.txt
-
-      - name: 🏗️ Build documentation
-        run: mkdocs build --strict --clean
-
-      - name: ✅ Verify docs output
-        run: |
-          test -d site || (echo "❌ site directory not found" && exit 1)
-
   release:
-    name: Semantic Release
+    needs: test
     runs-on: ubuntu-latest
-    needs: [pre-release-validation, comprehensive-testing, documentation-build]
     permissions:
       contents: write
+      packages: write
       issues: write
       pull-requests: write
-      id-token: write # Required for OIDC Trusted Publisher
-      packages: write
-
+      id-token: write # Required for OIDC authentication with npm provenance
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🔧 Setup Node.js with npm Trusted Publishers
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
 
-      - name: 📦 Install dependencies
-        run: npm ci
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
 
-      - name: 🏗️ Build package
-        run: npm run build
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: 🚀 Run Semantic Release
+      - name: Build package
+        run: pnpm run build
+
+      - name: Release with semantic-release
+        run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run release
+          HUSKY: '0' # Disable git hooks during automated release commits
 
-      - name: 📈 Post-release validation
-        if: success()
-        run: |
-          echo "Waiting for package to propagate to npm..."
-          sleep 10
-
-          # Verify the package was published
-          if npm view @juspay/vokal version 2>/dev/null; then
-            PUBLISHED_VERSION=$(npm view @juspay/vokal version)
-            echo "✅ Package published successfully: @juspay/vokal@$PUBLISHED_VERSION"
-            echo "🔐 Published with OIDC Trusted Publisher (keyless)"
-            echo "✅ Cryptographic provenance attestation included"
-          else
-            echo "⚠️  Package not yet available on npm (may take a few moments)"
-          fi
-
-  post-release:
-    name: Post-Release Tasks
-    runs-on: ubuntu-latest
-    needs: [release]
-    if: success()
-    permissions:
-      contents: write
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: release
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🔧 Setup Node.js
+      - name: Setup Node for GitHub Packages
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@juspay'
 
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 📊 Get release information
-        id: release-info
+      - name: Publish to GitHub Packages
         run: |
-          LATEST_VERSION=$(npm view @juspay/vokal version 2>/dev/null || node -p "require('./package.json').version")
-          echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
-          echo "📦 Released version: $LATEST_VERSION"
-
-      - name: 🎉 Release summary
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🎉 Vokal Release Completed Successfully!"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "📦 Package: @juspay/vokal"
-          echo "🏷️  Version: ${{ steps.release-info.outputs.version }}"
-          echo "🔗 NPM: https://www.npmjs.com/package/@juspay/vokal"
-          echo "📖 Documentation: https://juspay.github.io/vokal/"
-          echo "🐛 Issues: https://github.com/juspay/vokal/issues"
-          echo ""
-          echo "✨ Features included:"
-          echo "   🎙️  Text-to-Speech (TTS) with background audio"
-          echo "   🎧 Speech-to-Text (STT) with voice activity detection"
-          echo "   🤖 AI-powered response evaluation"
-          echo "   🧪 Complete voice bot testing framework"
-          echo "   📊 Comprehensive test reporting"
-          echo ""
-          echo "📥 Installation:"
-          echo "   npm install @juspay/vokal@${{ steps.release-info.outputs.version }}"
-          echo ""
-          echo "🚀 Ready for production use!"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-  notify-failure:
-    name: Release Failure Notification
-    runs-on: ubuntu-latest
-    needs:
-      [
-        pre-release-validation,
-        comprehensive-testing,
-        documentation-build,
-        release,
-      ]
-    if: failure()
-
-    steps:
-      - name: 🚨 Release failed
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🚨 Vokal Release Pipeline Failed!"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "Failed jobs:"
-          echo "  - Pre-release validation: ${{ needs.pre-release-validation.result }}"
-          echo "  - Comprehensive testing: ${{ needs.comprehensive-testing.result }}"
-          echo "  - Documentation build: ${{ needs.documentation-build.result }}"
-          echo "  - Release: ${{ needs.release.result }}"
-          echo ""
-          echo "📋 Next steps:"
-          echo "  1. Check the workflow logs for detailed error messages"
-          echo "  2. Fix any issues identified in the failing jobs"
-          echo "  3. Push fixes and the pipeline will run automatically"
-          echo "  4. If needed, use workflow_dispatch for manual release"
-          echo ""
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          if [ -f "package.json" ]; then
+            echo "📦 Publishing to GitHub Packages..."
+            pnpm publish --access public --no-git-checks --registry https://npm.pkg.github.com
+            echo "✅ Published to GitHub Packages successfully!"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

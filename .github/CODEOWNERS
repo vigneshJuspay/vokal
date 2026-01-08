@@ -1,27 +1,21 @@
 # Global owners
-
-- @juspay-maintainers
+* @juspay-maintainers
 
 # Core source code
-
-/src/\*\* @juspay-maintainers
+/src/** @juspay-maintainers
 
 # Documentation
-
-\*.md @juspay-maintainers
-/docs/\*\* @juspay-maintainers
+*.md @juspay-maintainers
+/docs/** @juspay-maintainers
 
 # GitHub workflows and configs
-
-/.github/ @juspay-maintainers
+/.github/** @juspay-maintainers
 
 # Configuration files
-
-_.json @juspay-maintainers
-_.yml @juspay-maintainers
-\*.yaml @juspay-maintainers
+*.json @juspay-maintainers
+*.yml @juspay-maintainers
+*.yaml @juspay-maintainers
 
 # Build and tooling
-
-/scripts/ @juspay-maintainers
-tsconfig\*.json @juspay-maintainers
+/scripts/** @juspay-maintainers
+tsconfig*.json @juspay-maintainers

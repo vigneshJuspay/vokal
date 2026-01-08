@@ -9,7 +9,7 @@ Vokal provides a comprehensive SDK for voice testing and interaction. You can im
 ## Installation
 
 ```bash
-npm install @juspay/vokal
+pnpm add @juspay/vokal
 ```
 
 ## Core Services

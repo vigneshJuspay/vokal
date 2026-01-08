@@ -9,7 +9,7 @@ on:
 
 env:
   FORCE_COLOR: 1
-  HUSKY: 0  # Disable Husky hooks in CI
+  HUSKY: 0 # Disable Husky hooks in CI
 
 jobs:
   quality-check:
@@ -24,26 +24,31 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: 🔧 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: 🏗️ Build TypeScript
-        run: npm run build
+        run: pnpm run build
 
       - name: 💅 Check Prettier formatting
-        run: npm run format:check
+        run: pnpm run format:check
 
       - name: 🔍 Run ESLint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: 📘 Type checking
-        run: npm run typecheck
+        run: pnpm run typecheck
 
   unit-tests:
     name: Unit Tests
@@ -58,20 +63,25 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: 🔧 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: 🏗️ Build project
-        run: npm run build
+        run: pnpm run build
 
       - name: 🧪 Run unit tests
-        run: npm test
+        run: pnpm test
 
       - name: ✅ Verify build artifacts
         run: |
@@ -94,17 +104,22 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: 🔧 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: 🏗️ Build TypeScript
-        run: npm run build
+        run: pnpm run build
 
       - name: 🧪 Test CLI commands
         run: |
@@ -141,23 +156,28 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: pnpm install
 
-      - name: 🔒 Run npm audit (high)
-        run: npm audit --audit-level=high
+      - name: 🔒 Run pnpm audit (high)
+        run: pnpm audit --audit-level=high
         continue-on-error: true
 
       - name: 🛡️ Check for critical vulnerabilities
         run: |
           echo "Checking for critical vulnerabilities..."
-          npm audit --audit-level=critical || true
+          pnpm audit --audit-level=critical || true
 
   documentation-validation:
     name: Documentation Validation
@@ -199,8 +219,8 @@ jobs:
 
       - name: ✅ Verify docs build output
         run: |
-          test -d site || (echo "❌ site directory not found" && exit 1)
-          test -f site/index.html || (echo "❌ site/index.html not found" && exit 1)
+          test -d _site || (echo "❌ _site directory not found" && exit 1)
+          test -f _site/index.html || (echo "❌ _site/index.html not found" && exit 1)
           echo "✅ Documentation built successfully"
 
       - name: 📋 Validate package.json completeness
@@ -224,27 +244,32 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: 🔍 Check for duplicate dependencies
         run: |
-          npm dedupe --dry-run
+          pnpm dedupe --dry-run
           echo "✅ No duplicate dependencies found"
 
       - name: 📊 List production dependencies
         run: |
           echo "Production dependencies:"
-          npm ls --prod --depth=0
+          pnpm ls --prod --depth=0
 
       - name: ⚠️ Check for outdated packages
-        run: npm outdated || true
+        run: pnpm outdated || true
 
   release-validation:
     name: Release Validation
@@ -257,21 +282,27 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: 🏗️ Build package
-        run: npm run build
+        run: pnpm run build
 
       - name: 📦 Test package contents
         run: |
-          npm pack --dry-run
+          pnpm pack --dry-run
           echo "✅ Package contents verified"
 
       - name: 🔍 Verify exports

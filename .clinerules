@@ -72,7 +72,7 @@ TTS (Neurolink) → Audio Mixing → Playback → STT (Google) → AI Evaluation
 # Clone and install
 git clone https://github.com/juspay/vokal.git
 cd vokal
-npm install
+pnpm install
 
 # Environment setup
 cp .env.example .env
@@ -82,36 +82,36 @@ cp .env.example .env
 # - GOOGLE_AI_API_KEY=your_api_key
 
 # Build
-npm run build
+pnpm run build
 ```
 
 ### **Development Commands**
 
 ```bash
-npm run dev              # Watch mode (tsc --watch)
-npm run build            # Clean build
-npm run clean            # Remove dist/
-npm start                # Run compiled code
-npm run cli              # Run CLI directly
+pnpm run dev              # Watch mode (tsc --watch)
+pnpm run build            # Clean build
+pnpm run clean            # Remove dist/
+pnpm start                # Run compiled code
+pnpm run cli              # Run CLI directly
 
 # Code Quality
-npm run lint             # ESLint check
-npm run lint:fix         # Auto-fix lint issues
-npm run format           # Prettier format
-npm run format:check     # Check formatting
-npm run typecheck        # TypeScript type check
-npm run validate         # Lint + format check
-npm run validate:all     # Full validation + tests
+pnpm run lint             # ESLint check
+pnpm run lint:fix         # Auto-fix lint issues
+pnpm run format           # Prettier format
+pnpm run format:check     # Check formatting
+pnpm run typecheck        # TypeScript type check
+pnpm run validate         # Lint + format check
+pnpm run validate:all     # Full validation + tests
 
 # Testing (coming soon)
-npm test                 # Run tests
-npm run test:watch       # Watch mode
-npm run test:coverage    # Coverage report
+pnpm test                 # Run tests
+pnpm run test:watch       # Watch mode
+pnpm run test:coverage    # Coverage report
 
 # Documentation (coming soon)
-npm run docs:build       # Build MkDocs
-npm run docs:serve       # Serve docs locally
-npm run docs:gh-deploy   # Deploy to GitHub Pages
+pnpm run docs:build       # Build MkDocs
+pnpm run docs:serve       # Serve docs locally
+pnpm run docs:gh-deploy   # Deploy to GitHub Pages
 ```
 
 ---
@@ -303,9 +303,9 @@ refactor(voice-test): simplify TTS generation logic
 
 ```bash
 # Version bump
-npm version patch      # Bug fixes (1.0.0 → 1.0.1)
-npm version minor      # New features (1.0.0 → 1.1.0)
-npm version major      # Breaking changes (1.0.0 → 2.0.0)
+pnpm version patch      # Bug fixes (1.0.0 → 1.0.1)
+pnpm version minor      # New features (1.0.0 → 1.1.0)
+pnpm version major      # Breaking changes (1.0.0 → 2.0.0)
 
 # Automated release (via GitHub Actions)
 git push --tags
@@ -326,7 +326,7 @@ git push --tags
 ### **Pre-Commit Checks**
 
 ```bash
-npm run lint && npm run format:check && npm run typecheck && npm run build
+pnpm run lint && pnpm run format:check && pnpm run typecheck && pnpm run build
 ```
 
 ### **Quality Standards**
@@ -345,8 +345,8 @@ npm run lint && npm run format:check && npm run typecheck && npm run build
 
 ```bash
 # Development
-npm install && npm run build
-npm run dev
+pnpm install && pnpm run build
+pnpm run dev
 
 # Generate speech
 vokal voice generate "Hello!" --voice en-US-Neural2-F --play
@@ -355,7 +355,7 @@ vokal voice generate "Hello!" --voice en-US-Neural2-F --play
 vokal test ./examples/sample-config.json
 
 # Quality check
-npm run validate:all
+pnpm run validate:all
 ```
 
 ### **Key Files**
