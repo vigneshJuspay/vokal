@@ -1,3 +1,18 @@
+## 1.0.0 (2026-01-08)
+
+* chore(release): prepare release infrastructure with pnpm and OIDC publishing ([8ea8fe5](https://github.com/juspay/vokal/commit/8ea8fe5))
+* chore(release): prepare v1.0 release with complete documentation and GitHub workflows ([4be8fa3](https://github.com/juspay/vokal/commit/4be8fa3))
+* fix: remove unneccesary files ([d8f9a81](https://github.com/juspay/vokal/commit/d8f9a81))
+* fix: remove unused Vite and Vitest configurations ([7f52e4f](https://github.com/juspay/vokal/commit/7f52e4f))
+* fix(ci): fix security job by adding missing dependency installation ([d07b812](https://github.com/juspay/vokal/commit/d07b812))
+* fix(deps): resolve security vulnerabilities in dependencies ([6786468](https://github.com/juspay/vokal/commit/6786468))
+* fix(test): update test script to not fail CI ([d6c7f64](https://github.com/juspay/vokal/commit/d6c7f64))
+* feat: Added major impacting changes ([bd118d1](https://github.com/juspay/vokal/commit/bd118d1))
+* feat: improved .env.example ([e99e401](https://github.com/juspay/vokal/commit/e99e401))
+* feat: update readme.md ([d754540](https://github.com/juspay/vokal/commit/d754540))
+* feat(repo): add GitHub workflows, documentation, and project infrastructure ([63c192f](https://github.com/juspay/vokal/commit/63c192f))
+* Vokal - Test your AI bot ([98865e4](https://github.com/juspay/vokal/commit/98865e4))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
