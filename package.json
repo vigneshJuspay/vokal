@@ -1,6 +1,6 @@
 {
   "name": "@juspay/vokal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Production voice bot framework with TTS, STT, and AI evaluation using Neurolink",
   "author": {
     "name": "Juspay Technologies",

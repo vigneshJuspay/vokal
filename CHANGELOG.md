@@ -1,3 +1,7 @@
+## <small>1.0.1 (2026-01-08)</small>
+
+* fix(ci): use correct --check flag for pnpm dedupe ([0059a35](https://github.com/juspay/vokal/commit/0059a35))
+
 ## 1.0.0 (2026-01-08)
 
 * chore(release): prepare release infrastructure with pnpm and OIDC publishing ([8ea8fe5](https://github.com/juspay/vokal/commit/8ea8fe5))
